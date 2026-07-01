@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import FlowInstanceDetailView from '../views/FlowInstanceDetailView.vue'
+import { resolveEdgeRuntimeState } from '../utils/edgeRuntimeState.js'
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({
@@ -262,13 +263,14 @@ describe('FlowInstanceDetailView', () => {
     const wrapper = createWrapper()
     await wrapper.vm.$nextTick()
 
-    const vm = wrapper.vm as any
     // Edge targeting active node in failed instance should be edge-failed
-    expect(vm.resolveEdgeState('completed', 'active', 'failed')).toBe('edge-failed')
+    expect(resolveEdgeRuntimeState('completed', 'active', { contextFailed: true }).state).toBe('edge-failed')
     // Edge from active node in failed instance should be edge-failed
-    expect(vm.resolveEdgeState('active', 'completed', 'failed')).toBe('edge-failed')
+    expect(resolveEdgeRuntimeState('active', 'completed', { contextFailed: true }).state).toBe('edge-failed')
     // Edge between completed nodes should remain edge-completed
-    expect(vm.resolveEdgeState('completed', 'completed', 'failed')).toBe('edge-completed')
+    expect(resolveEdgeRuntimeState('completed', 'completed', { contextFailed: true }).state).toBe('edge-completed')
+    // Explicit target failure
+    expect(resolveEdgeRuntimeState('completed', 'failed').state).toBe('edge-failed')
   })
 
   it('renders status icon indicators for different node states', async () => {

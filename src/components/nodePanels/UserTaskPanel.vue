@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, inject } from 'vue'
 import type { Node } from '@vue-flow/core'
+import type { RejectPolicy } from '@schema-platform/flow-shared'
+import { FLOW_DEFAULT_REJECT_POLICY_KEY } from '../../types/flowSettingsContext.js'
 import SectionToggle from './SectionToggle.vue'
 import FieldRow from './FieldRow.vue'
 import UserPicker from '../UserPicker.vue'
@@ -26,18 +28,7 @@ const approvalMode = computed(() => (props.node.data?.approvalMode as string) ??
 /* --- Reject policy --- */
 
 const rejectPolicy = computed(() => (props.node.data?.rejectPolicy as string) ?? 'follow-global')
-const globalRejectPolicy = ref('reject-on-all')
-
-// Load global policy from flow definition metadata
-onMounted(async () => {
-  try {
-    // The global policy is stored in the flow version metadata
-    // For now, default to reject-on-all; actual loading would need flow definition context
-    globalRejectPolicy.value = 'reject-on-all'
-  } catch {
-    // ignore
-  }
-})
+const globalRejectPolicy = inject(FLOW_DEFAULT_REJECT_POLICY_KEY, computed(() => 'reject-on-all' as RejectPolicy))
 
 /* --- Published forms --- */
 

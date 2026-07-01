@@ -8,6 +8,10 @@
   stroke-dasharray: 8 4;
 }
 
+.edgeSelected {
+  stroke: var(--color-primary) !important;
+}
+
 @keyframes dash-flow {
   to {
     stroke-dashoffset: -12;

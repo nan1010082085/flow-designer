@@ -11,11 +11,24 @@
     height: 100%;
     background-color: transparent;
   }
+
+  :global(.vue-flow__edge) {
+    z-index: 0;
+  }
+
+  :global(.vue-flow__node) {
+    z-index: 1;
+  }
 }
 
 // Error highlight on nodes — applied via Vue Flow's class property
 :global(.vue-flow__node.node-error) {
   filter: drop-shadow(0 0 3px var(--color-danger));
+}
+
+:global(.vue-flow__edge.selected .vue-flow__edge-path) {
+  stroke: var(--color-primary) !important;
+  stroke-width: 2.5;
 }
 
 .minimap {

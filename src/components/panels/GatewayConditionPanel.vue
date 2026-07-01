@@ -69,7 +69,7 @@ function targetLabel(edge: Edge): string {
       <el-input
         :model-value="defaultFlow"
         placeholder="默认连线 ID（可选）"
-        @input="update('defaultFlow', $event)"
+        @update:model-value="update('defaultFlow', $event)"
       />
     </FieldRow>
 
@@ -77,7 +77,7 @@ function targetLabel(edge: Edge): string {
       <el-input
         :model-value="description"
         placeholder="网关描述（可选）"
-        @input="update('description', $event)"
+        @update:model-value="update('description', $event)"
       />
     </FieldRow>
   </SectionToggle>
@@ -108,9 +108,9 @@ function targetLabel(edge: Edge): string {
 
       <FieldRow label="条件标签">
         <el-input
-          :model-value="(edge.label as string) ?? ''"
+          :model-value="String(edge.label ?? edge.data?.label ?? '')"
           placeholder="条件标签"
-          @input="updateEdgeLabel(edge, $event)"
+          @update:model-value="updateEdgeLabel(edge, $event)"
         />
       </FieldRow>
 
@@ -118,7 +118,7 @@ function targetLabel(edge: Edge): string {
         <el-input
           :model-value="edge.data?.conditionExpression ?? ''"
           :placeholder="conditionPlaceholder"
-          @input="updateEdgeCondition(edge, $event)"
+          @update:model-value="updateEdgeCondition(edge, $event)"
         />
       </FieldRow>
     </div>

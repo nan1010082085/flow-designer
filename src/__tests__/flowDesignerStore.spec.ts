@@ -19,6 +19,14 @@ describe('flowDesigner store', () => {
     expect(store.history).toEqual([])
     expect(store.historyIndex).toBe(-1)
     expect(store.isDirty).toBe(false)
+    expect(store.edgeLineStyle).toBe('smoothstep')
+  })
+
+  it('persists edge line style', () => {
+    const store = useFlowDesignerStore()
+    store.setEdgeLineStyle('bezier')
+    expect(store.edgeLineStyle).toBe('bezier')
+    expect(localStorage.getItem('sfp-flow-edge-line-style')).toBe('bezier')
   })
 
   describe('selectNode', () => {

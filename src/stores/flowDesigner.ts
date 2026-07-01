@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, shallowRef } from 'vue'
 import type { Node, Edge } from '@vue-flow/core'
+import {
+  type EdgeLineStyle,
+  EDGE_LINE_STYLE_STORAGE_KEY,
+  parseEdgeLineStyle,
+} from '../types/edgeLineStyle.js'
 
 export interface GraphSnapshot {
   nodes: Node[]
@@ -15,6 +20,14 @@ export const useFlowDesignerStore = defineStore('flowDesigner', () => {
   const historyIndex = ref(-1)
   const isDirty = ref(false)
   const errorNodeIds = ref<Set<string>>(new Set())
+  const edgeLineStyle = ref<EdgeLineStyle>(
+    parseEdgeLineStyle(localStorage.getItem(EDGE_LINE_STYLE_STORAGE_KEY)),
+  )
+
+  function setEdgeLineStyle(style: EdgeLineStyle) {
+    edgeLineStyle.value = style
+    localStorage.setItem(EDGE_LINE_STYLE_STORAGE_KEY, style)
+  }
 
   function selectNode(id: string | null) {
     selectedNodeId.value = id
@@ -95,5 +108,7 @@ export const useFlowDesignerStore = defineStore('flowDesigner', () => {
     errorNodeIds,
     setErrorNodes,
     clearErrorNodes,
+    edgeLineStyle,
+    setEdgeLineStyle,
   }
 })

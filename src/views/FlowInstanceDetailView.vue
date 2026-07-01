@@ -25,6 +25,7 @@ import {
 import { AnimatedEdge } from '../components/edges/index.js'
 import { useFlowExport } from '../composables/useFlowExport.js'
 import { resolveVueFlowNodeType } from '../utils/bpmnVueFlow.js'
+import { resolveEdgeRuntimeState } from '../utils/edgeRuntimeState.js'
 import styles from './FlowInstanceDetailView.module.scss'
 
 import '@vue-flow/core/dist/style.css'
@@ -93,18 +94,20 @@ async function loadInstanceGraph() {
         graphEdges.value = version.graph.edges.map((e) => {
           const sourceState = tokenMap.get(e.source.cell)
           const targetState = tokenMap.get(e.target.cell)
-          const edgeState = resolveEdgeState(sourceState, targetState, inst.status)
+          const edgeState = resolveEdgeRuntimeState(sourceState, targetState, {
+            contextFailed: inst.status === 'failed',
+          })
           return {
             id: e.id,
             type: 'animated-edge',
             source: e.source.cell,
             target: e.target.cell,
             label: e.data?.label,
-            class: edgeState,
+            class: edgeState.state,
             data: {
               conditionExpression: e.data?.conditionExpression,
               isDefault: e.data?.isDefault,
-              animated: edgeState === 'edge-active',
+              animated: edgeState.animated,
             },
           }
         })
@@ -202,17 +205,6 @@ function getNodeClass(state: string | undefined, instanceStatus?: string): strin
   }
   if (state === 'failed') return 'node-failed'
   return ''
-}
-
-function resolveEdgeState(sourceState: string | undefined, targetState: string | undefined, instanceStatus?: string): string {
-  if (instanceStatus === 'failed') {
-    // If instance failed, show edges connected to active/waiting nodes as failed
-    if (targetState === 'active' || targetState === 'waiting') return 'edge-failed'
-    if (sourceState === 'active' || sourceState === 'waiting') return 'edge-failed'
-  }
-  if (targetState === 'active') return 'edge-active'
-  if (sourceState === 'completed' && targetState === 'completed') return 'edge-completed'
-  return 'edge-pending'
 }
 
 const instance = computed(() => store.currentInstance)

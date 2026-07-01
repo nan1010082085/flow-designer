@@ -74,6 +74,14 @@ export const useFlowGraphStore = defineStore('flowGraph', () => {
     const idx = edges.value.findIndex(e => e.id === id)
     if (idx === -1) return
     const edge = edges.value[idx]
+    if (key === 'label') {
+      const label = typeof value === 'string' && value.length > 0 ? value : undefined
+      const nextData = { ...(edge.data as Record<string, unknown> | undefined) }
+      delete nextData.label
+      const updated: Edge = { ...edge, label, data: nextData }
+      edges.value = edges.value.map((e, i) => i === idx ? updated : e)
+      return
+    }
     const updated = { ...edge, data: { ...edge.data, [key]: value } }
     edges.value = edges.value.map((e, i) => i === idx ? updated : e)
   }
@@ -119,7 +127,9 @@ export const useFlowGraphStore = defineStore('flowGraph', () => {
         source: { cell: e.source },
         target: { cell: e.target },
         data: {
-          label: typeof e.label === 'string' ? e.label : undefined,
+          label: typeof e.label === 'string'
+            ? e.label
+            : (e.data as Record<string, unknown>)?.label as string | undefined,
           conditionExpression: (e.data as Record<string, unknown>)?.conditionExpression as string | undefined,
           isDefault: (e.data as Record<string, unknown>)?.isDefault as boolean | undefined,
         },

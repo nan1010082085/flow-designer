@@ -1,5 +1,6 @@
 import type { Node, Edge } from '@vue-flow/core'
 import { useFlowGraphStore } from '../stores/flowGraph.js'
+import { resolveEdgeRuntimeState } from '../utils/edgeRuntimeState.js'
 
 const STATE_CLASSES = [
   'node-running', 'node-completed', 'node-failed', 'node-waiting', 'node-active',
@@ -54,18 +55,13 @@ export function useSimulationVisual() {
 
     graphStore.edges = graphStore.edges.map((edge): Edge => {
       const base = stripStateClasses(edge.class)
-      const sourceVisited = visitedNodeIds.has(edge.source)
-      const targetActive = activeSet.has(edge.target)
-      const targetVisited = visitedNodeIds.has(edge.target)
-
-      let stateClass = 'edge-pending'
-      let animated = false
-      if (targetActive && sourceVisited) {
-        stateClass = 'edge-active'
-        animated = true
-      } else if (sourceVisited && targetVisited) {
-        stateClass = 'edge-completed'
-      }
+      const sourceState = visitedNodeIds.has(edge.source) ? 'completed' : undefined
+      const targetState = activeSet.has(edge.target)
+        ? 'active'
+        : visitedNodeIds.has(edge.target)
+          ? 'completed'
+          : undefined
+      const { state: stateClass, animated } = resolveEdgeRuntimeState(sourceState, targetState)
 
       return {
         ...edge,

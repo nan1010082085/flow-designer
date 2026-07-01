@@ -6,11 +6,12 @@
   align-items: center;
   justify-content: center;
   filter: drop-shadow(var(--shadow-node));
-  transition: filter 0.2s ease;
+  transition: filter 0.2s ease, transform 0.2s ease;
 }
 
-.wrapper:hover {
+.wrapper:hover:not(.selected) {
   filter: drop-shadow(var(--shadow-node-hover));
+  transform: translateY(-2px);
 }
 
 .selected {

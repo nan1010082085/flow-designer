@@ -76,7 +76,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, provide, toRef } from 'vue'
+import { storeToRefs } from 'pinia'
 import { VueFlow, useVueFlow, MarkerType } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -103,6 +104,7 @@ import {
 import { AnimatedEdge } from './edges/index.js'
 import { BPMN_SHAPE_TO_VF_TYPE } from '../utils/bpmnVueFlow.js'
 import styles from './FlowCanvas.module.scss'
+import { EDGE_LINE_STYLE_KEY } from '../types/edgeLineStyle.js'
 
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
@@ -121,6 +123,8 @@ const props = defineProps<{
 const readOnly = computed(() => props.readOnly ?? false)
 
 const designerStore = useFlowDesignerStore()
+const { selectedNodeId, selectedEdgeId } = storeToRefs(designerStore)
+provide(EDGE_LINE_STYLE_KEY, toRef(designerStore, 'edgeLineStyle'))
 const flowGraph = useFlowGraphStore()
 const canvasEl = ref<HTMLDivElement>()
 
@@ -164,7 +168,35 @@ const {
   fitView,
   addSelectedNodes,
   removeSelectedNodes,
+  addSelectedEdges,
+  removeSelectedEdges,
 } = useVueFlow({ id: 'flow-canvas' })
+
+function syncNodeSelection(nodeId: string | null) {
+  const selected = getNodes.value.filter((n) => n.selected)
+  if (selected.length) removeSelectedNodes(selected)
+  if (!nodeId) return
+  const node = getNodes.value.find((n) => n.id === nodeId)
+  if (node) addSelectedNodes([node])
+}
+
+function syncEdgeSelection(edgeId: string | null) {
+  const selected = getEdges.value.filter((e) => e.selected)
+  if (selected.length) removeSelectedEdges(selected)
+  if (!edgeId) return
+  const edge = getEdges.value.find((e) => e.id === edgeId)
+  if (edge) addSelectedEdges([edge])
+}
+
+watch(selectedNodeId, (nodeId) => {
+  if (readOnly.value) return
+  syncNodeSelection(nodeId)
+})
+
+watch(selectedEdgeId, (edgeId) => {
+  if (readOnly.value) return
+  syncEdgeSelection(edgeId)
+})
 
 // Wire up copy/paste (Ctrl+C / Ctrl+V / Ctrl+D)
 useCopyNode({
@@ -192,9 +224,18 @@ function minimapNodeColor(node: { type?: string }): string {
   return NODE_TYPE_COLORS[node.type ?? ''] ?? '#c0c4cc'
 }
 
-onNodeClick(({ node }) => designerStore.selectNode(node.id))
-onEdgeClick(({ edge }) => designerStore.selectEdge(edge.id))
-onPaneClick(() => designerStore.clearSelection())
+onNodeClick(({ node }) => {
+  if (readOnly.value) return
+  designerStore.selectNode(node.id)
+})
+onEdgeClick(({ edge }) => {
+  if (readOnly.value) return
+  designerStore.selectEdge(edge.id)
+})
+onPaneClick(() => {
+  if (readOnly.value) return
+  designerStore.clearSelection()
+})
 
 onConnect((params) => {
   if (readOnly.value) return
@@ -227,10 +268,16 @@ function onKeyDown(e: KeyboardEvent) {
   if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return
 
   if (e.key === 'Delete' || e.key === 'Backspace') {
-    const selectedNodes = getNodes.value.filter(n => n.selected)
-    const selectedEdges = getEdges.value.filter(e => e.selected)
-    for (const n of selectedNodes) flowGraph.removeNode(n.id)
-    for (const e of selectedEdges) flowGraph.removeEdge(e.id)
+    e.preventDefault()
+    const nodeIds = new Set<string>()
+    const edgeIds = new Set<string>()
+    for (const n of getNodes.value.filter((n) => n.selected)) nodeIds.add(n.id)
+    for (const edge of getEdges.value.filter((edge) => edge.selected)) edgeIds.add(edge.id)
+    if (selectedNodeId.value) nodeIds.add(selectedNodeId.value)
+    if (selectedEdgeId.value) edgeIds.add(selectedEdgeId.value)
+    for (const id of nodeIds) flowGraph.removeNode(id)
+    for (const id of edgeIds) flowGraph.removeEdge(id)
+    if (nodeIds.size || edgeIds.size) designerStore.clearSelection()
   }
 
   // Ctrl+Z: undo, Ctrl+Y / Ctrl+Shift+Z: redo
@@ -301,14 +348,7 @@ onUnmounted(() => {
  * 选中并定位到指定节点：清除当前选中 → 选中目标节点 → fitView 聚焦到该节点
  */
 function selectAndZoomToNode(nodeId: string) {
-  // Clear current selection
-  const allNodes = getNodes.value
-  removeSelectedNodes(allNodes)
-  // Select the target node
-  const target = allNodes.find(n => n.id === nodeId)
-  if (target) {
-    addSelectedNodes([target])
-  }
+  designerStore.selectNode(nodeId)
   // Zoom and pan to the node
   fitView({ nodes: [nodeId], padding: 0.5, duration: 500 })
 }

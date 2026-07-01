@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, nextTick } from 'vue'
+import { computed, ref, watch, nextTick, provide } from 'vue'
 import { VueFlow, MarkerType, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -94,6 +94,8 @@ import {
 } from './nodes/index.js'
 import { AnimatedEdge } from './edges/index.js'
 import { resolveVueFlowNodeType } from '../utils/bpmnVueFlow.js'
+import { resolveEdgeRuntimeState } from '../utils/edgeRuntimeState.js'
+import { EDGE_LINE_STYLE_KEY, type EdgeLineStyle } from '../types/edgeLineStyle.js'
 import styles from './FlowGraphPreview.module.scss'
 
 const defaultEdgeOptions = {
@@ -110,14 +112,26 @@ const props = withDefaults(defineProps<{
   activeNodeIds?: string[]
   /** 已完成节点 */
   completedNodeIds?: string[]
+  /** 失败节点 */
+  failedNodeIds?: string[]
+  /** 整体执行/实例是否失败 */
+  contextFailed?: boolean
+  /** 连线样式：折线 / 贝塞尔曲线 */
+  edgeLineStyle?: EdgeLineStyle
   compact?: boolean
 }>(), {
   graph: null,
   highlightNodeIds: () => [],
   activeNodeIds: () => [],
   completedNodeIds: () => [],
+  failedNodeIds: () => [],
+  contextFailed: false,
+  edgeLineStyle: 'smoothstep',
   compact: false,
 })
+
+const resolvedEdgeLineStyle = computed(() => props.edgeLineStyle ?? 'smoothstep')
+provide(EDGE_LINE_STYLE_KEY, resolvedEdgeLineStyle)
 
 const containerRef = ref<HTMLDivElement>()
 const flowId = `flow-preview-${Math.random().toString(36).slice(2, 8)}`
@@ -125,22 +139,30 @@ const flowId = `flow-preview-${Math.random().toString(36).slice(2, 8)}`
 const { fitView } = useVueFlow({ id: flowId })
 
 function resolveNodeClass(nodeId: string): string {
+  if (props.failedNodeIds.includes(nodeId)) return 'node-failed'
   if (props.activeNodeIds.includes(nodeId)) return 'node-running'
   if (props.completedNodeIds.includes(nodeId)) return 'node-completed'
   if (props.highlightNodeIds.includes(nodeId)) return 'highlighted'
   return ''
 }
 
-function resolveEdgeClass(sourceId: string, targetId: string): { class: string; animated: boolean } {
-  const activeSet = new Set(props.activeNodeIds)
-  const completedSet = new Set(props.completedNodeIds)
-  if (activeSet.has(targetId) && completedSet.has(sourceId)) {
-    return { class: 'edge-active', animated: true }
-  }
-  if (completedSet.has(sourceId) && completedSet.has(targetId)) {
-    return { class: 'edge-completed', animated: false }
-  }
-  return { class: 'edge-pending', animated: false }
+function resolveEdgeVisual(sourceId: string, targetId: string): { class: string; animated: boolean } {
+  const sourceState = props.failedNodeIds.includes(sourceId)
+    ? 'failed'
+    : props.completedNodeIds.includes(sourceId)
+      ? 'completed'
+      : props.activeNodeIds.includes(sourceId)
+        ? 'active'
+        : undefined
+  const targetState = props.failedNodeIds.includes(targetId)
+    ? 'failed'
+    : props.activeNodeIds.includes(targetId)
+      ? 'active'
+      : props.completedNodeIds.includes(targetId)
+        ? 'completed'
+        : undefined
+  const visual = resolveEdgeRuntimeState(sourceState, targetState, { contextFailed: props.contextFailed })
+  return { class: visual.state, animated: visual.animated }
 }
 
 const vfNodes = computed(() => {
@@ -159,7 +181,7 @@ const vfEdges = computed(() => {
   return graphEdges.map((e) => {
     const sourceId = e.source.cell
     const targetId = e.target.cell
-    const { class: edgeClass, animated } = resolveEdgeClass(sourceId, targetId)
+    const { class: edgeClass, animated } = resolveEdgeVisual(sourceId, targetId)
     return {
       id: e.id,
       source: sourceId,

@@ -23,8 +23,7 @@
             <el-input
               :model-value="selectedNode.data?.label ?? ''"
               placeholder="节点名称"
-
-              @input="updateNodeData('label', $event)"
+              @update:model-value="updateNodeData('label', $event)"
             />
           </FieldRow>
           <FieldRow label="节点说明" textarea>
@@ -33,8 +32,7 @@
               :model-value="selectedNode.data?.documentation ?? ''"
               placeholder="节点说明（可选）"
               :rows="2"
-
-              @input="updateNodeData('documentation', $event)"
+              @update:model-value="updateNodeData('documentation', $event)"
             />
           </FieldRow>
         </SectionToggle>
@@ -77,18 +75,16 @@
         <SectionToggle title="连线属性" :count="3">
           <FieldRow label="连线标签">
             <el-input
-              :model-value="(selectedEdge.label as string) ?? ''"
+              :model-value="String(selectedEdge.label ?? selectedEdge.data?.label ?? '')"
               placeholder="连线标签"
-
-              @input="updateEdgeData('label', $event)"
+              @update:model-value="updateEdgeData('label', $event)"
             />
           </FieldRow>
           <FieldRow label="条件表达式">
             <el-input
               :model-value="selectedEdge.data?.conditionExpression ?? ''"
               placeholder="${amount > 10000}"
-
-              @input="updateEdgeData('conditionExpression', $event)"
+              @update:model-value="updateEdgeData('conditionExpression', $event)"
             />
           </FieldRow>
           <FieldRow label="默认连线">
@@ -98,6 +94,11 @@
             />
           </FieldRow>
         </SectionToggle>
+        <div :class="styles.deleteRow">
+          <el-button type="danger" plain size="small" @click="deleteSelectedEdge">
+            删除连线
+          </el-button>
+        </div>
       </el-scrollbar>
     </template>
 
@@ -206,5 +207,11 @@ function copyEdgeId() {
 
 function selectEdge(edgeId: string) {
   designerStore.selectEdge(edgeId)
+}
+
+function deleteSelectedEdge() {
+  if (!selectedEdgeId.value) return
+  graphStore.removeEdge(selectedEdgeId.value)
+  designerStore.clearSelection()
 }
 </script>

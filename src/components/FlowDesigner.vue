@@ -11,6 +11,7 @@
       :layout-direction="layoutDirection"
       :layout-node-sep="layoutNodeSep"
       :layout-rank-sep="layoutRankSep"
+      :edge-line-style="store.edgeLineStyle"
       :is-simulating="isSimulating"
       :current-step="simulationStep"
       :status-message="simulationStatus"
@@ -35,6 +36,7 @@
       @update:layout-direction="layoutDirection = $event"
       @update:layout-node-sep="layoutNodeSep = $event"
       @update:layout-rank-sep="layoutRankSep = $event"
+      @update:edge-line-style="store.setEdgeLineStyle"
       @toggle-simulation="onToggleSimulation"
       @step-forward="onSimulationStep"
       @reset-simulation="onSimulationReset"
@@ -183,7 +185,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, reactive, ref, watch, nextTick } from 'vue'
+import { onMounted, onUnmounted, provide, reactive, ref, toRef, watch, nextTick } from 'vue'
 import { useRoute, onBeforeRouteLeave } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Location } from '@element-plus/icons-vue'
@@ -218,6 +220,7 @@ import { convertFlowPayloadToVueFlow } from '../utils/bpmnVueFlow.js'
 import { flowApi } from '../api/flowApi.js'
 import { useFlowTemplateStore } from '../stores/flowTemplate.js'
 import { generateThumbnail } from '../composables/useFlowThumbnail.js'
+import { FLOW_DEFAULT_REJECT_POLICY_KEY } from '../types/flowSettingsContext.js'
 import styles from './FlowDesigner.module.scss'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
 import AppDialog from '@schema-platform/platform-shared/components/common/AppDialog.vue'
@@ -350,6 +353,8 @@ const flowSettings = reactive({
   permissions: { editors: [], launchers: [], viewers: [] } as FlowPermissions,
   defaultRejectPolicy: 'reject-on-all' as RejectPolicy,
 })
+
+provide(FLOW_DEFAULT_REJECT_POLICY_KEY, toRef(flowSettings, 'defaultRejectPolicy'))
 
 function onSettingsSave(settings: typeof flowSettings) {
   Object.assign(flowSettings, settings)

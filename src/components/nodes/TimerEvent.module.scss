@@ -10,11 +10,12 @@
   cursor: grab;
   position: relative;
   box-shadow: var(--shadow-node);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
-.node:hover {
+.node:hover:not(.selected) {
   box-shadow: var(--shadow-node-hover);
+  transform: translateY(-2px);
 }
 
 .selected {

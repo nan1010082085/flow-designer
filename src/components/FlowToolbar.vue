@@ -86,6 +86,14 @@
               @update:model-value="$emit('update:layoutRankSep', $event as number)"
             />
           </div>
+          <div :class="styles.layoutRow">
+            <span :class="styles.layoutLabel">连线样式</span>
+            <FilterTabs
+              :model-value="edgeLineStyle ?? 'smoothstep'"
+              :options="edgeLineStyleOptions"
+              @update:model-value="$emit('update:edgeLineStyle', $event as EdgeLineStyle)"
+            />
+          </div>
           <el-button
             type="primary"
             size="small"
@@ -153,7 +161,7 @@
             <span :class="styles.shortcutKeys"><kbd>Ctrl</kbd> + <kbd>D</kbd></span>
           </div>
           <div :class="styles.shortcutRow">
-            <span :class="styles.shortcutLabel">删除</span>
+            <span :class="styles.shortcutLabel">删除节点/连线</span>
             <span :class="styles.shortcutKeys"><kbd>Delete</kbd></span>
           </div>
           <div :class="styles.shortcutRow">
@@ -304,6 +312,7 @@ import { ArrowDown, Refresh } from '@element-plus/icons-vue'
 import type { SimulationSpeed } from '../composables/useSimulation.js'
 import { SPEED_LABELS } from '../composables/useSimulation.js'
 import type { LayoutDirection } from '../composables/useAutoLayout.js'
+import { EDGE_LINE_STYLE_OPTIONS, type EdgeLineStyle } from '../types/edgeLineStyle.js'
 import NotificationBell from './NotificationBell.vue'
 import styles from './FlowToolbar.module.scss'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
@@ -329,9 +338,11 @@ const props = defineProps<{
   layoutDirection?: LayoutDirection
   layoutNodeSep?: number
   layoutRankSep?: number
+  edgeLineStyle?: EdgeLineStyle
 }>()
 
 const layoutPopoverVisible = ref(false)
+const edgeLineStyleOptions = EDGE_LINE_STYLE_OPTIONS
 
 const speedLabel = computed(() => SPEED_LABELS[props.speed ?? 'normal'])
 
@@ -374,5 +385,6 @@ const emit = defineEmits<{
   'update:layoutDirection': [direction: LayoutDirection]
   'update:layoutNodeSep': [value: number]
   'update:layoutRankSep': [value: number]
+  'update:edgeLineStyle': [style: EdgeLineStyle]
 }>()
 </script>
