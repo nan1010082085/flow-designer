@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@schema-platform/platform-shared/utils/stores/authStore'
 
 // qiankun 模式下使用 memory history，避免子应用路由篡改宿主 URL
 const isQiankunChild = () => !!window.__POWERED_BY_QIANKUN__
@@ -113,8 +114,17 @@ function inferRouteBase(): string {
   return ''
 }
 
+function resolveRouteBase(routeBase?: string): string {
+  if (routeBase) return routeBase
+  const inferred = inferRouteBase()
+  if (inferred) return inferred
+  const viteBase = import.meta.env.BASE_URL
+  if (viteBase && viteBase !== '/') return viteBase
+  return import.meta.env.VITE_ROUTE_BASE || '/'
+}
+
 export function createFlowRouter(routeBase?: string) {
-  const base = routeBase || inferRouteBase() || import.meta.env.VITE_ROUTE_BASE || '/'
+  const base = resolveRouteBase(routeBase)
   const router = createRouter({
     history: createWebHistory(base),
     routes,
@@ -122,8 +132,16 @@ export function createFlowRouter(routeBase?: string) {
 
   // 路由守卫：独立访问时检查登录状态
   router.beforeEach((to) => {
-    // callback、login、嵌入式页面不需要检查
     if (to.name === 'auth-callback' || to.name === 'login' || to.meta?.embedded) {
+      if (to.name === 'login' && !isQiankunChild()) {
+        const authStore = useAuthStore()
+        if (authStore.accessToken && authStore.user) {
+          return { path: (to.query.redirect as string) || '/' }
+        }
+        if (authStore.accessToken && !authStore.user) {
+          authStore.reset()
+        }
+      }
       return true
     }
 
