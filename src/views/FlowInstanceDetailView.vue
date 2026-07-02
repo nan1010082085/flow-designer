@@ -23,6 +23,7 @@ import {
   SubProcessNode,
 } from '../components/nodes/index.js'
 import { AnimatedEdge } from '../components/edges/index.js'
+import FlowVariablesPanel from '../components/FlowVariablesPanel.vue'
 import { useFlowExport } from '../composables/useFlowExport.js'
 import { resolveVueFlowNodeType } from '../utils/bpmnVueFlow.js'
 import { resolveEdgeRuntimeState } from '../utils/edgeRuntimeState.js'
@@ -367,18 +368,7 @@ async function handleWithdraw() {
         </el-tab-pane>
 
         <el-tab-pane label="流程变量" name="variables">
-          <template v-if="instance.variables && Object.keys(instance.variables).length > 0">
-            <el-descriptions :column="2" border size="small">
-              <el-descriptions-item
-                v-for="(value, key) in instance.variables"
-                :key="String(key)"
-                :label="String(key)"
-              >
-                {{ String(value) }}
-              </el-descriptions-item>
-            </el-descriptions>
-          </template>
-          <div v-else :class="styles.emptyTip">暂无流程变量</div>
+          <FlowVariablesPanel :variables="instance.variables" />
         </el-tab-pane>
 
         <el-tab-pane label="活动轨迹" name="tokens">

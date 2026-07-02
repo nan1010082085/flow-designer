@@ -97,6 +97,13 @@ const routes = [
     component: () => import('@/views/embed/TaskListView.vue'),
     meta: { embedded: true, public: true },
   },
+  {
+    path: '/embed/task/:taskId',
+    name: 'embed-task-detail',
+    component: () => import('@/views/embed/EmbedTaskDetailView.vue'),
+    meta: { embedded: true, public: true },
+    props: true,
+  },
 
   {
     path: '/:pathMatch(.*)*',
