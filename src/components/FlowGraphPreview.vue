@@ -17,6 +17,7 @@
         :pannable="true"
         :zoomable="true"
         :default-edge-options="defaultEdgeOptions"
+        :default-marker-color="FLOW_EDGE_STROKE"
         :default-viewport="{ zoom: 1, x: 0, y: 0 }"
         :min-zoom="0.2"
         :max-zoom="2"
@@ -71,7 +72,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, nextTick, provide } from 'vue'
-import { VueFlow, MarkerType, useVueFlow } from '@vue-flow/core'
+import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import '@vue-flow/core/dist/style.css'
@@ -96,14 +97,10 @@ import { AnimatedEdge } from './edges/index.js'
 import { resolveVueFlowNodeType } from '../utils/bpmnVueFlow.js'
 import { resolveEdgeRuntimeState } from '../utils/edgeRuntimeState.js'
 import { EDGE_LINE_STYLE_KEY, type EdgeLineStyle } from '../types/edgeLineStyle.js'
+import { defaultFlowEdgeOptions, FLOW_EDGE_STROKE } from '../constants/flowEdgeDefaults.js'
 import styles from './FlowGraphPreview.module.scss'
 
-const defaultEdgeOptions = {
-  type: 'animated-edge' as const,
-  style: { stroke: 'var(--border-color)', strokeWidth: 1.5 },
-  markerEnd: { type: MarkerType.ArrowClosed },
-  data: { animated: false },
-}
+const defaultEdgeOptions = defaultFlowEdgeOptions
 
 const props = withDefaults(defineProps<{
   graph?: FlowGraph | null

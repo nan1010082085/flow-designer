@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import type { Node } from '@vue-flow/core'
 import type { FlowApiConfig } from '@schema-platform/flow-shared'
 import SectionToggle from './SectionToggle.vue'
 import FieldRow from './FieldRow.vue'
+import { flowApi } from '../../api/flowApi'
 
 const props = defineProps<{ node: Node }>()
 const emit = defineEmits<{ updateNodeData: [key: string, value: unknown] }>()
@@ -57,6 +58,31 @@ function parseJsonOrRaw(val: string): unknown {
 /* --- 服务类型（保留） --- */
 
 const serviceType = computed(() => (props.node.data?.serviceType as string) ?? 'http')
+
+interface PublishedForm {
+  id: string
+  name: string
+  publishId: string
+}
+
+const publishedForms = ref<PublishedForm[]>([])
+
+onMounted(async () => {
+  try {
+    const data = await flowApi.getPublishedForms()
+    publishedForms.value = data as PublishedForm[]
+  } catch {
+    publishedForms.value = []
+  }
+})
+
+const formPublishId = computed(() => (props.node.data?.formPublishId as string) ?? '')
+
+function onSchemaFormSelect(publishId: string) {
+  const form = publishedForms.value.find((f) => f.publishId === publishId)
+  update('formSchemaId', form?.id ?? '')
+  update('formPublishId', publishId)
+}
 </script>
 
 <template>
@@ -69,6 +95,7 @@ const serviceType = computed(() => (props.node.data?.serviceType as string) ?? '
       >
         <el-radio value="http">HTTP</el-radio>
         <el-radio value="mq">消息队列</el-radio>
+        <el-radio value="schema">Schema 表单</el-radio>
         <el-radio value="custom">自定义</el-radio>
       </el-radio-group>
     </FieldRow>
@@ -109,6 +136,29 @@ const serviceType = computed(() => (props.node.data?.serviceType as string) ?? '
         placeholder='{"Content-Type": "application/json"}'
         @input="updateApi('headers', parseJsonOrRaw($event))"
       />
+    </FieldRow>
+  </SectionToggle>
+
+  <!-- F-01 Schema 表单节点 -->
+  <SectionToggle v-if="serviceType === 'schema'" title="Schema 表单" :count="2">
+    <FieldRow label="绑定表单">
+      <el-select
+        :model-value="formPublishId"
+        placeholder="选择已发布 Schema"
+        filterable
+        clearable
+        @change="onSchemaFormSelect"
+      >
+        <el-option
+          v-for="form in publishedForms"
+          :key="form.publishId"
+          :label="form.name"
+          :value="form.publishId"
+        />
+      </el-select>
+    </FieldRow>
+    <FieldRow label="说明">
+      <span style="font-size: 12px; color: #909399">服务任务经过时采集/展示绑定 Schema（F-01 配置）</span>
     </FieldRow>
   </SectionToggle>
 

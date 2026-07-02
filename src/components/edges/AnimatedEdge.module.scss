@@ -1,10 +1,12 @@
 .edgeAnimated {
+  stroke: #8c95a6;
   stroke-dasharray: 8 4;
   animation: dash-flow 1s linear infinite;
   will-change: stroke-dashoffset;
 }
 
 .edgeStatic {
+  stroke: #8c95a6;
   stroke-dasharray: 8 4;
 }
 

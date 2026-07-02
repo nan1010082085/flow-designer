@@ -7,6 +7,8 @@ import AppLayout from '../components/AppLayout.vue'
 vi.mock('@schema-platform/platform-shared/qiankun', () => ({
   useQiankunShell: () => ({
     isQiankunSubApp: computed(() => false),
+    shouldHideSubAppMenu: computed(() => false),
+    shellEmbedMode: computed(() => 'independent'),
     goToShellHome: vi.fn(),
   }),
 }))

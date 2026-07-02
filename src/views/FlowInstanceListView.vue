@@ -181,36 +181,41 @@ function formatDate(dateStr: string | Date) {
 
           <!-- 卡片操作 -->
           <div :class="styles.cardActions">
-            <el-button size="small" text type="primary" @click="handleViewDetail(item.id)">
-              <AppIcon name="view" :size="14" class="el-icon--left" />详情
-            </el-button>
-            <el-button
-              v-if="item.status === 'running'"
-              size="small"
-              text
-              type="warning"
-              @click="handleSuspend(item.id)"
-            >
-              <AppIcon name="video-pause" :size="14" />
-            </el-button>
-            <el-button
-              v-if="item.status === 'suspended'"
-              size="small"
-              text
-              type="success"
-              @click="handleResume(item.id)"
-            >
-              <AppIcon name="video-play" :size="14" />
-            </el-button>
-            <el-button
-              v-if="item.status === 'running'"
-              size="small"
-              text
-              type="danger"
-              @click="handleTerminate(item.id)"
-            >
-              <AppIcon name="switch-button" :size="14" />
-            </el-button>
+            <el-tooltip content="详情" placement="top" :show-after="300">
+              <el-button size="small" text type="primary" @click="handleViewDetail(item.id)">
+                <AppIcon name="view" :size="14" />
+              </el-button>
+            </el-tooltip>
+            <el-tooltip v-if="item.status === 'running'" content="暂停" placement="top" :show-after="300">
+              <el-button
+                size="small"
+                text
+                type="warning"
+                @click="handleSuspend(item.id)"
+              >
+                <AppIcon name="video-pause" :size="14" />
+              </el-button>
+            </el-tooltip>
+            <el-tooltip v-if="item.status === 'suspended'" content="恢复" placement="top" :show-after="300">
+              <el-button
+                size="small"
+                text
+                type="success"
+                @click="handleResume(item.id)"
+              >
+                <AppIcon name="video-play" :size="14" />
+              </el-button>
+            </el-tooltip>
+            <el-tooltip v-if="item.status === 'running'" content="终止" placement="top" :show-after="300">
+              <el-button
+                size="small"
+                text
+                type="danger"
+                @click="handleTerminate(item.id)"
+              >
+                <AppIcon name="switch-button" :size="14" />
+              </el-button>
+            </el-tooltip>
           </div>
         </div>
       </div>

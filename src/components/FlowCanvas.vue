@@ -11,6 +11,7 @@
       v-model:edges="flowGraph.edges"
       :class="styles.flow"
       :default-edge-options="defaultEdgeOptions"
+      :default-marker-color="FLOW_EDGE_STROKE"
       :snap-to-grid="true"
       :snap-grid="[10, 10]"
       :nodes-connectable="!readOnly"
@@ -78,7 +79,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, provide, toRef } from 'vue'
 import { storeToRefs } from 'pinia'
-import { VueFlow, useVueFlow, MarkerType } from '@vue-flow/core'
+import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { MiniMap } from '@vue-flow/minimap'
@@ -105,16 +106,12 @@ import { AnimatedEdge } from './edges/index.js'
 import { BPMN_SHAPE_TO_VF_TYPE } from '../utils/bpmnVueFlow.js'
 import styles from './FlowCanvas.module.scss'
 import { EDGE_LINE_STYLE_KEY } from '../types/edgeLineStyle.js'
+import { defaultFlowEdgeOptions, FLOW_EDGE_STROKE } from '../constants/flowEdgeDefaults.js'
 
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
 
-const defaultEdgeOptions = {
-  type: 'animated-edge' as const,
-  style: { stroke: 'var(--border-color)', strokeWidth: 1.5 },
-  markerEnd: { type: MarkerType.ArrowClosed },
-  data: { animated: false },
-}
+const defaultEdgeOptions = defaultFlowEdgeOptions
 
 const props = defineProps<{
   readOnly?: boolean

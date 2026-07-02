@@ -4,6 +4,12 @@
   background: var(--bg-color-page);
 }
 
+.layoutEmbedded {
+  .main {
+    width: 100%;
+  }
+}
+
 .sidebar {
   width: 200px;
   background: var(--bg-color-white);

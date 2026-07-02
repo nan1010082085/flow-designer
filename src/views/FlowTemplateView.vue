@@ -185,20 +185,26 @@ function formatDate(dateStr: string | Date) {
             </span>
           </div>
           <div :class="styles.cardActions">
-            <el-button size="small" @click="handlePreview(tpl.id)">
-              预览
-            </el-button>
-            <el-button size="small" type="primary" @click="handleApply(tpl.id, tpl.name)">
-              使用模板
-            </el-button>
-            <el-button
+            <el-tooltip content="预览" placement="top" :show-after="300">
+              <el-button size="small" text @click="handlePreview(tpl.id)">
+                <AppIcon name="view" />
+              </el-button>
+            </el-tooltip>
+            <el-tooltip content="使用模板" placement="top" :show-after="300">
+              <el-button size="small" text type="primary" @click="handleApply(tpl.id, tpl.name)">
+                <AppIcon name="plus" />
+              </el-button>
+            </el-tooltip>
+            <el-tooltip
               v-if="!tpl.isBuiltin"
-              size="small"
-              type="danger"
-              @click="handleDelete(tpl.id, tpl.name)"
+              content="删除"
+              placement="top"
+              :show-after="300"
             >
-              删除
-            </el-button>
+              <el-button size="small" text type="danger" @click="handleDelete(tpl.id, tpl.name)">
+                <AppIcon name="delete" />
+              </el-button>
+            </el-tooltip>
           </div>
         </div>
       </div>
