@@ -9,11 +9,13 @@ import { createApp, type App } from 'vue'
 import { createPinia } from 'pinia'
 import { renderWithQiankun, qiankunWindow } from 'vite-plugin-qiankun/dist/helper'
 import { setupElementPlus } from '@schema-platform/platform-shared/config/element'
+import { setupAppAuth } from '@schema-platform/platform-shared/utils/authSession'
+import { handleUnauthorized } from '@schema-platform/platform-shared/utils/authSession'
 import { initQiankunProps, initQiankunShellProps } from '@schema-platform/platform-shared/qiankun'
 import { flowLog } from '@schema-platform/platform-shared/utils/logger'
 import AppRoot from './App.vue'
 import { createFlowRouter } from './router/index.js'
-import { setTokenProvider } from './api/flowApi.js'
+import { setTokenProvider, setFlowUnauthorizedHandler } from './api/flowApi.js'
 
 let app: App | null = null
 let router: ReturnType<typeof createFlowRouter> | null = null
@@ -29,8 +31,11 @@ function render() {
 
   router = createFlowRouter(currentRouteBase)
   app = createApp(AppRoot)
-  app.use(createPinia())
+  const pinia = createPinia()
+  app.use(pinia)
   app.use(router)
+  setupAppAuth()
+  setFlowUnauthorizedHandler(() => handleUnauthorized())
   setupElementPlus(app)
 
   const mountEl = document.getElementById('flow-app')

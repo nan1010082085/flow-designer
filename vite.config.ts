@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import qiankun from 'vite-plugin-qiankun'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createSharedSourceAliases, sharedOptimizeDepsExclude } from '../scripts/vite-shared-source.mjs'
 
 const isProd = process.env.NODE_ENV === 'production'
 const rootDir = fileURLToPath(new URL('.', import.meta.url))
@@ -28,7 +29,13 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: { '@': resolve(rootDir, 'src') },
+    alias: [
+      { find: '@', replacement: resolve(rootDir, 'src') },
+      ...createSharedSourceAliases(import.meta.url, { platformShared: true, flowShared: true }),
+    ],
+  },
+  optimizeDeps: {
+    exclude: sharedOptimizeDepsExclude({ platformShared: true, flowShared: true }),
   },
   server: {
     port: 5200,

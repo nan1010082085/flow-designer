@@ -39,29 +39,43 @@ import type {
   UpstreamNodeData,
 } from '@schema-platform/flow-shared'
 
+import { redirectToLogin } from '@schema-platform/platform-shared/utils/authPaths'
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL
+const ACCESS_TOKEN_KEY = 'sfp_access_token'
 
 /** Token 提供者，由 main.ts 注入，避免 apiClient 直接耦合微前端框架 */
 let tokenProvider: (() => string | null) | null = null
+let onUnauthorized: (() => void) | null = null
 
 export function setTokenProvider(provider: () => string | null): void {
   tokenProvider = provider
 }
 
+export function setFlowUnauthorizedHandler(handler: () => void): void {
+  onUnauthorized = handler
+}
+
+function resolveAuthToken(): string | null {
+  return tokenProvider?.() ?? localStorage.getItem(ACCESS_TOKEN_KEY)
+}
+
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const token = tokenProvider?.()
+  const token = resolveAuthToken()
   const authHeaders: Record<string, string> = {}
   if (token) {
     authHeaders['Authorization'] = `Bearer ${token}`
   }
 
   const res = await fetch(`${API_BASE}${url}`, {
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json', ...authHeaders, ...options?.headers },
     ...options,
   })
   if (!res.ok) {
-    // 401: 抛出认证错误
     if (res.status === 401) {
+      onUnauthorized?.()
+      redirectToLogin()
       throw new Error('Authentication required')
     }
     const text = await res.text().catch(() => '')
@@ -77,18 +91,23 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
  * 自动附加认证头，与内部 request 函数共享 token 机制。
  */
 export async function fetchApiRaw(url: string, init?: RequestInit): Promise<unknown> {
-  const token = tokenProvider?.()
+  const token = resolveAuthToken()
   const authHeaders: Record<string, string> = {}
   if (token) authHeaders['Authorization'] = `Bearer ${token}`
 
   const mergedInit: RequestInit = {
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json', ...authHeaders, ...init?.headers },
     ...init,
   }
 
   const res = await fetch(url, mergedInit)
   if (!res.ok) {
-    if (res.status === 401) throw new Error('Authentication required')
+    if (res.status === 401) {
+      onUnauthorized?.()
+      redirectToLogin()
+      throw new Error('Authentication required')
+    }
     const text = await res.text().catch(() => '')
     throw new Error(`HTTP ${res.status}: ${text || res.statusText}`)
   }

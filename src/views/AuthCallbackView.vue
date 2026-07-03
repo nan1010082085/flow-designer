@@ -9,28 +9,31 @@
 import { onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { SSOClient } from '@schema-platform/platform-shared/utils/sso'
+import {
+  persistSSOClientId,
+  startTokenRefreshSchedule,
+} from '@schema-platform/platform-shared/utils/authSession'
+import { useAuthStore } from '@schema-platform/platform-shared/utils/stores/authStore'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
 
 const router = useRouter()
 const route = useRoute()
 
-const TOKEN_KEY = 'sfp_access_token'
-const REFRESH_TOKEN_KEY = 'sfp_refresh_token'
-
 onMounted(async () => {
   const origin = window.location.origin
+  const clientId = 'flow'
+  persistSSOClientId(clientId)
   const client = new SSOClient({
-    clientId: 'flow',
+    clientId,
     redirectUri: `${origin}${import.meta.env.BASE_URL}auth/callback`,
     ssoBaseUrl: origin,
   })
 
   try {
     const tokens = await client.handleCallback()
-    localStorage.setItem(TOKEN_KEY, tokens.accessToken)
-    if (tokens.refreshToken) {
-      localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken)
-    }
+    const authStore = useAuthStore()
+    authStore.setTokens(tokens.accessToken, tokens.refreshToken)
+    startTokenRefreshSchedule(tokens.expiresIn)
 
     const redirect = route.query.redirect as string | undefined
     await router.replace(redirect || '/')

@@ -224,6 +224,7 @@ import { FLOW_DEFAULT_REJECT_POLICY_KEY } from '../types/flowSettingsContext.js'
 import styles from './FlowDesigner.module.scss'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
 import AppDialog from '@schema-platform/platform-shared/components/common/AppDialog.vue'
+import { APP_CONFIGS } from '@schema-platform/platform-shared/qiankun/config'
 
 const canvasRef = ref<InstanceType<typeof FlowCanvas>>()
 const store = useFlowDesignerStore()
@@ -264,8 +265,8 @@ const showRightPanel = ref(true)
 const showAiDrawer = ref(false)
 const aiIframeRef = ref<HTMLIFrameElement>()
 const aiBaseUrl = import.meta.env.DEV
-  ? 'http://localhost:5300/index-sidebar.html'
-  : `${window.location.origin}/schema-platform/micro/ai/index-sidebar.html`
+  ? `http://localhost:${APP_CONFIGS.ai.devPort}/index-sidebar.html`
+  : `${window.location.origin}${APP_CONFIGS.ai.basePath}index-sidebar.html`
 let offAiApply: (() => void) | undefined
 let offAiPublished: (() => void) | undefined
 

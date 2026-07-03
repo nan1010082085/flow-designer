@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@schema-platform/platform-shared/utils/stores/authStore'
+import { guardAuthenticatedRoute } from '@schema-platform/platform-shared/utils/authSession'
 
 // qiankun 模式下使用 memory history，避免子应用路由篡改宿主 URL
 const isQiankunChild = () => !!window.__POWERED_BY_QIANKUN__
@@ -137,29 +138,19 @@ export function createFlowRouter(routeBase?: string) {
     routes,
   })
 
-  // 路由守卫：独立访问时检查登录状态
-  router.beforeEach((to) => {
+  // 路由守卫：检查登录状态（含容器内跳转 Shell 登录）
+  router.beforeEach(async (to) => {
     if (to.name === 'auth-callback' || to.name === 'login' || to.meta?.embedded) {
       if (to.name === 'login' && !isQiankunChild()) {
         const authStore = useAuthStore()
         if (authStore.accessToken && authStore.user) {
           return { path: (to.query.redirect as string) || '/' }
         }
-        if (authStore.accessToken && !authStore.user) {
-          authStore.reset()
-        }
       }
       return true
     }
 
-    // 微前端模式下跳过检查（宿主已处理鉴权）
-    if (!isQiankunChild() && !localStorage.getItem('sfp_access_token')) {
-      // 跳转到统一登录页，带上当前路径作为 redirect 参数
-      return {
-        name: 'login',
-        query: { redirect: window.location.pathname },
-      }
-    }
+    return guardAuthenticatedRoute(to)
   })
 
   return router
