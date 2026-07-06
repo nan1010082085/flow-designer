@@ -33,6 +33,7 @@ export default defineConfig({
       { find: '@', replacement: resolve(rootDir, 'src') },
       ...createSharedSourceAliases(import.meta.url, { platformShared: true, flowShared: true }),
     ],
+    dedupe: ['vue', 'vue-router', 'pinia', 'element-plus'],
   },
   optimizeDeps: {
     exclude: sharedOptimizeDepsExclude({ platformShared: true, flowShared: true }),

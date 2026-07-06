@@ -1,4 +1,4 @@
-# @schema-form/flow-web
+# @flow
 
 流程引擎前端 -- BPMN 流程设计器、流程管理、任务收件箱。
 
@@ -102,7 +102,7 @@ Schema Form Platform 的流程引擎前端，基于 Vue Flow 可视化编排 BPM
 
 - SSO 单点登录（OAuth2 授权码模式）
 - 微前端嵌入（qiankun memory history）
-- AI 能力集成（通过节点配置面板与 schema-form-ai 交互）
+- AI 能力集成（通过节点配置面板与 ai 交互）
 
 ## 项目结构
 

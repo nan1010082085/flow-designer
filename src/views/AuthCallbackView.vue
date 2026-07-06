@@ -12,6 +12,7 @@ import { SSOClient } from '@schema-platform/platform-shared/utils/sso'
 import {
   persistSSOClientId,
   startTokenRefreshSchedule,
+  bootstrapAuthSession,
 } from '@schema-platform/platform-shared/utils/authSession'
 import { useAuthStore } from '@schema-platform/platform-shared/utils/stores/authStore'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
@@ -33,6 +34,8 @@ onMounted(async () => {
     const tokens = await client.handleCallback()
     const authStore = useAuthStore()
     authStore.setTokens(tokens.accessToken, tokens.refreshToken)
+    // Fetch user info after getting tokens
+    await bootstrapAuthSession()
     startTokenRefreshSchedule(tokens.expiresIn)
 
     const redirect = route.query.redirect as string | undefined
