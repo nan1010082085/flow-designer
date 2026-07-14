@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import type { Node } from '@vue-flow/core'
-import type { FlowApiConfig } from '@schema-platform/flow-shared'
+import type { FlowApiConfig } from '@/shared/flow'
 import SectionToggle from './SectionToggle.vue'
 import FieldRow from './FieldRow.vue'
 import { flowApi } from '../../api/flowApi'

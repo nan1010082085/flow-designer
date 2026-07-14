@@ -130,7 +130,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import type { TaskInstanceData, RejectTargetNode } from '@schema-platform/flow-shared'
+import type { TaskInstanceData, RejectTargetNode } from '@/shared/flow'
 import { flowApi } from '../api/flowApi'
 import UserPicker from './UserPicker.vue'
 import AppDialog from '@schema-platform/platform-shared/components/common/AppDialog.vue'

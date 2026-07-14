@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import type { Node } from '@vue-flow/core'
-import type { RejectPolicy } from '@schema-platform/flow-shared'
+import type { RejectPolicy } from '@/shared/flow'
 import { FLOW_DEFAULT_REJECT_POLICY_KEY } from '../../types/flowSettingsContext.js'
 import SectionToggle from './SectionToggle.vue'
 import FieldRow from './FieldRow.vue'

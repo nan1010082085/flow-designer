@@ -7,7 +7,7 @@ import HintText from './HintText.vue'
 import SubProcessSelector from '../SubProcessSelector.vue'
 import { flowApi } from '../../api/flowApi'
 import styles from './SubProcessPanel.module.scss'
-import type { FlowDefinitionData } from '@schema-platform/flow-shared'
+import type { FlowDefinitionData } from '@/shared/flow'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
 
 const props = defineProps<{ node: Node }>()

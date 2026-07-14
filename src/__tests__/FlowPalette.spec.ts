@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { BpmnElementType } from '@schema-platform/flow-shared'
+import { BpmnElementType } from '@/shared/flow'
 import FlowPalette from '../components/FlowPalette.vue'
 
 function mountPalette() {

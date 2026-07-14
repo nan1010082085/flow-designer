@@ -10,7 +10,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import * as echarts from 'echarts'
 import { useFlowMonitorStore } from '../stores/flowMonitor.js'
-import type { TimeRangePreset } from '@schema-platform/flow-shared'
+import type { TimeRangePreset } from '@/shared/flow'
 import styles from './FlowStatsView.module.scss'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
 import FilterTabs from '@schema-platform/platform-shared/components/common/FilterTabs.vue'

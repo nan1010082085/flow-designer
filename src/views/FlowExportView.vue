@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { flowApi } from '../api/flowApi.js'
 import { useFlowExport } from '../composables/useFlowExport.js'
-import type { FlowDefinitionData } from '@schema-platform/flow-shared'
+import type { FlowDefinitionData } from '@/shared/flow'
 import styles from './FlowExportView.module.scss'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
 import FilterTabs from '@schema-platform/platform-shared/components/common/FilterTabs.vue'

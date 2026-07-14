@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { flowApi } from '../api/flowApi.js'
 import styles from './SubProcessSelector.module.scss'
-import type { FlowDefinitionData } from '@schema-platform/flow-shared'
+import type { FlowDefinitionData } from '@/shared/flow'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
 import AppDialog from '@schema-platform/platform-shared/components/common/AppDialog.vue'
 

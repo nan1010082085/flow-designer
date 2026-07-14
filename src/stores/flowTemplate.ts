@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useDataLoading } from '@schema-platform/platform-shared/utils/useDataLoading'
-import type { FlowTemplateData, FlowTemplateQuery } from '@schema-platform/flow-shared'
+import type { FlowTemplateData, FlowTemplateQuery } from '@/shared/flow'
 import { flowApi } from '../api/flowApi.js'
 
 export type FlowTemplate = FlowTemplateData

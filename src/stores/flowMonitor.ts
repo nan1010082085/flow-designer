@@ -8,7 +8,7 @@ import type {
   FlowMonitorTopFlow,
   FlowMonitorTimeRange,
   TimeRangePreset,
-} from '@schema-platform/flow-shared'
+} from '@/shared/flow'
 import { flowApi } from '../api/flowApi.js'
 
 export const useFlowMonitorStore = defineStore('flowMonitor', () => {

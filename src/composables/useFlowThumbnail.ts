@@ -1,7 +1,7 @@
 /**
  * 从 FlowGraph 节点数据生成 SVG 缩略图 base64
  */
-import type { FlowGraph } from '@schema-platform/flow-shared'
+import type { FlowGraph } from '@/shared/flow'
 
 /** 与 FlowListView 卡片缩略图区域一致 */
 const THUMB_W = 280

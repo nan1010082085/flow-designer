@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { shallowRef, type ShallowRef } from 'vue'
 import type { Node, Edge } from '@vue-flow/core'
-import type { FlowGraph, FlowNodeData, FlowEdgeData } from '@schema-platform/flow-shared'
-import { BpmnElementType, DEFAULT_NODE_SIZES } from '@schema-platform/flow-shared'
+import type { FlowGraph, FlowNodeData, FlowEdgeData } from '@/shared/flow'
+import { BpmnElementType, DEFAULT_NODE_SIZES } from '@/shared/flow'
 
 // VueFlow type -> BpmnElementType
 const VF_TYPE_TO_BPMN: Record<string, BpmnElementType> = {

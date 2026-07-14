@@ -3,7 +3,7 @@ import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import TaskInboxView from '../views/TaskInboxView.vue'
 import { useFlowInstanceStore } from '../stores/flowInstance'
-import type { TaskInstanceData } from '@schema-platform/flow-shared'
+import type { TaskInstanceData } from '@/shared/flow'
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: vi.fn() }),

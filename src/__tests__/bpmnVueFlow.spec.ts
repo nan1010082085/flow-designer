@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { BpmnElementType } from '@schema-platform/flow-shared'
+import { BpmnElementType } from '@/shared/flow'
 import {
   resolveVueFlowNodeType,
   convertFlowPayloadToVueFlow,

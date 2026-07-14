@@ -6,7 +6,7 @@ import type {
   TaskInstanceData,
   RejectTargetNode,
   BatchResult,
-} from '@schema-platform/flow-shared'
+} from '@/shared/flow'
 import { flowApi } from '../api/flowApi.js'
 
 export type FlowInstance = FlowInstanceData & { definitionName?: string | null }

@@ -37,7 +37,7 @@ import type {
   FlowMonitorTimeRange,
   BatchResult,
   UpstreamNodeData,
-} from '@schema-platform/flow-shared'
+} from '@/shared/flow'
 
 import { redirectToLogin } from '@schema-platform/platform-shared/utils/authPaths'
 

@@ -31,12 +31,12 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: '@', replacement: resolve(rootDir, 'src') },
-      ...createSharedSourceAliases(import.meta.url, { platformShared: true, flowShared: true }),
+      ...createSharedSourceAliases(import.meta.url, { platformShared: true }),
     ],
     dedupe: ['vue', 'vue-router', 'pinia', 'element-plus'],
   },
   optimizeDeps: {
-    exclude: sharedOptimizeDepsExclude({ platformShared: true, flowShared: true }),
+    exclude: sharedOptimizeDepsExclude({ platformShared: true }),
   },
   server: {
     port: 5200,

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import FlowSettingsDialog from '../components/FlowSettingsDialog.vue'
-import type { FlowPermissions, RejectPolicy } from '@schema-platform/flow-shared'
+import type { FlowPermissions, RejectPolicy } from '@/shared/flow'
 
 interface SettingsData {
   name: string

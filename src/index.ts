@@ -16,4 +16,4 @@ export type { FlowInstance, TaskInstance } from './stores/flowInstance.js'
 
 export { flowApi } from './api/flowApi.js'
 
-export type { ApprovalLogEntry } from '@schema-platform/flow-shared'
+export type { ApprovalLogEntry } from '@/shared/flow'

@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import type { FlowGraph } from '@schema-platform/flow-shared'
+import type { FlowGraph } from '@/shared/flow'
 import { flowApi } from '../../api/flowApi'
 import FlowGraphPreview from '../../components/FlowGraphPreview.vue'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'

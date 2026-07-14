@@ -7,7 +7,7 @@
  * - 可选重试
  * - 响应归一化（dataPath 提取）
  */
-import type { FlowApiConfig, FlowGraph } from '@schema-platform/flow-shared'
+import type { FlowApiConfig, FlowGraph } from '@/shared/flow'
 import { fetchApiRaw } from '@/api/flowApi'
 
 // ============================================================

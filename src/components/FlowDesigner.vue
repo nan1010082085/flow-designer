@@ -195,14 +195,14 @@ import {
   exportToBpmnXml,
   importFromBpmnXml,
   validateFlow,
-} from '@schema-platform/flow-shared'
+} from '@/shared/flow'
 import type {
   FlowGraph,
   FlowPermissions,
   FlowVersionData,
   RejectPolicy,
   ValidationError,
-} from '@schema-platform/flow-shared'
+} from '@/shared/flow'
 import type { Node, Edge } from '@vue-flow/core'
 import FlowToolbar from './FlowToolbar.vue'
 import FlowPalette from './FlowPalette.vue'

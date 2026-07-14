@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import FlowFormRenderer from '../components/FlowFormRenderer.vue'
-import type { TaskInstanceData } from '@schema-platform/flow-shared'
+import type { TaskInstanceData } from '@/shared/flow'
 
 vi.mock('../api/flowApi', () => ({
   flowApi: {

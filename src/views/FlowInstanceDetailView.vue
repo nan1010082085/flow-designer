@@ -7,7 +7,7 @@ import type { Node, Edge } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { useFlowInstanceStore } from '../stores/flowInstance.js'
 import { flowApi } from '../api/flowApi.js'
-import type { FlowGraph, ApprovalLogEntry } from '@schema-platform/flow-shared'
+import type { FlowGraph, ApprovalLogEntry } from '@/shared/flow'
 import {
   StartEventNode,
   EndEventNode,

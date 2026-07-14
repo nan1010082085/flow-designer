@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { flowApi } from '@/api/flowApi'
-import type { ApprovalLogEntry } from '@schema-platform/flow-shared'
+import type { ApprovalLogEntry } from '@/shared/flow'
 
 const emit = defineEmits<{
   (e: 'comment', taskId: string, comment: string): void

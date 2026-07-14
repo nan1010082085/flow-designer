@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { FlowGraph } from '@schema-platform/flow-shared'
+import type { FlowGraph } from '@/shared/flow'
 import { flowApi } from '../api/flowApi'
 import FlowGraphPreview from './FlowGraphPreview.vue'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'

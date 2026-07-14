@@ -1,7 +1,7 @@
 /**
  * BPMN ↔ Vue Flow 类型映射（设计器 12 种节点的唯一来源）
  */
-import { BpmnElementType } from '@schema-platform/flow-shared'
+import { BpmnElementType } from '@/shared/flow'
 import type { Node, Edge } from '@vue-flow/core'
 
 /** FlowGraph shape → Vue Flow node type */
