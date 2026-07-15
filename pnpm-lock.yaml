@@ -20,12 +20,9 @@ importers:
       '@iconify/vue':
         specifier: ^5.0.1
         version: 5.0.1(vue@3.5.39(typescript@5.7.3))
-      '@schema-platform/flow-shared':
-        specifier: file:../flow-shared
-        version: file:../flow-shared
       '@schema-platform/platform-shared':
-        specifier: file:../platform-shared
-        version: file:../platform-shared(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(typescript@5.7.3)(vue@3.5.39(typescript@5.7.3))
+        specifier: file:../shared/platform-shared
+        version: file:../shared/platform-shared(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(typescript@5.7.3)(vue@3.5.39(typescript@5.7.3))
       '@vue-flow/background':
         specifier: ^1.3.2
         version: 1.3.2(@vue-flow/core@1.48.2(vue@3.5.39(typescript@5.7.3)))(vue@3.5.39(typescript@5.7.3))
@@ -78,6 +75,9 @@ importers:
       sass-embedded:
         specifier: ^1.100.0
         version: 1.100.0
+      socket.io-client:
+        specifier: ^4.8.3
+        version: 4.8.3
       typescript:
         specifier: ~5.7.3
         version: 5.7.3
@@ -564,11 +564,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@schema-platform/flow-shared@file:../flow-shared':
-    resolution: {directory: ../flow-shared, type: directory}
-
-  '@schema-platform/platform-shared@file:../platform-shared':
-    resolution: {directory: ../platform-shared, type: directory}
+  '@schema-platform/platform-shared@file:../shared/platform-shared':
+    resolution: {directory: ../shared/platform-shared, type: directory}
     peerDependencies:
       element-plus: ^2.9.1
       vue: ^3.5.13
@@ -2065,9 +2062,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.62.2':
     optional: true
 
-  '@schema-platform/flow-shared@file:../flow-shared': {}
-
-  '@schema-platform/platform-shared@file:../platform-shared(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(typescript@5.7.3)(vue@3.5.39(typescript@5.7.3))':
+  '@schema-platform/platform-shared@file:../shared/platform-shared(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(typescript@5.7.3)(vue@3.5.39(typescript@5.7.3))':
     dependencies:
       '@element-plus/icons-vue': 2.3.2(vue@3.5.39(typescript@5.7.3))
       '@iconify-icons/ep': 1.2.12

@@ -44,14 +44,15 @@ export function buildObstacleRects(
   return nodes
     .filter((node) => !exclude.has(node.id))
     .map((node) => {
+      const n = node as Node & { measured?: { width?: number; height?: number }; dimensions?: { width?: number; height?: number } }
       const width =
-        node.measured?.width
-        ?? node.dimensions?.width
-        ?? (typeof node.width === 'number' ? node.width : defaults.width)
+        n.measured?.width
+        ?? n.dimensions?.width
+        ?? (typeof n.width === 'number' ? n.width : defaults.width)
       const height =
-        node.measured?.height
-        ?? node.dimensions?.height
-        ?? (typeof node.height === 'number' ? node.height : defaults.height)
+        n.measured?.height
+        ?? n.dimensions?.height
+        ?? (typeof n.height === 'number' ? n.height : defaults.height)
       return {
         id: node.id,
         left: node.position.x - padding,

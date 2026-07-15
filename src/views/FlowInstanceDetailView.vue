@@ -79,10 +79,10 @@ async function loadInstanceGraph() {
 
   if (inst.definitionId && inst.versionId) {
     try {
-      const version = (await flowApi.getVersion(inst.definitionId, inst.versionId)) as { graph: FlowGraph }
+      const version = await flowApi.getVersion(inst.definitionId, inst.versionId) as any
       if (version.graph) {
         const tokenMap = new Map((inst.tokens ?? []).map((t) => [t.nodeId, t.state]))
-        graphNodes.value = version.graph.nodes.map((n) => {
+        graphNodes.value = (version.graph.nodes as any[]).map((n: any) => {
           const state = tokenMap.get(n.id)
           return {
             id: n.id,
@@ -91,8 +91,8 @@ async function loadInstanceGraph() {
             data: { label: n.data?.label ?? n.id },
             class: getNodeClass(state, inst.status),
           }
-        })
-        graphEdges.value = version.graph.edges.map((e) => {
+        }) as any
+        graphEdges.value = (version.graph.edges as any[]).map((e: any) => {
           const sourceState = tokenMap.get(e.source.cell)
           const targetState = tokenMap.get(e.target.cell)
           const edgeState = resolveEdgeRuntimeState(sourceState, targetState, {
@@ -111,7 +111,7 @@ async function loadInstanceGraph() {
               animated: edgeState.animated,
             },
           }
-        })
+        }) as any
         return
       }
     } catch {
@@ -120,13 +120,13 @@ async function loadInstanceGraph() {
   }
 
   if (inst.tokens) {
-    graphNodes.value = inst.tokens.map((token) => ({
+    graphNodes.value = inst.tokens.map((token: any) => ({
       id: token.nodeId,
       type: token.nodeId.startsWith('end') ? 'end-event' : 'user-task',
       position: { x: 0, y: 0 },
       data: { label: token.nodeId },
       class: getNodeClass(token.state, inst.status),
-    }))
+    })) as any
     graphEdges.value = []
   }
 }

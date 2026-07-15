@@ -79,6 +79,9 @@ renderWithQiankun({
       router = null
     }
   },
+  update() {
+    flowLog.lifecycle('update')
+  },
 })
 
 // Standalone mode detection:
