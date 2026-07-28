@@ -30,7 +30,7 @@ pnpm --filter @flow build
 
 ### 设计与运行时（线框 & Mermaid）
 
-- [设计文档索引](./design/README.md)
+- [设计文档索引](./design/)
 - [信息架构与布局](./design/overview.md)
 - [流程设计器](./design/designer.md) — 画布、节点面板、模拟执行
 - [实例与任务](./design/instances-tasks.md) — 审批、嵌入页
