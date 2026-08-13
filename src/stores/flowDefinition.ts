@@ -11,7 +11,7 @@ export const useFlowDefinitionStore = defineStore('flowDefinition', () => {
   const currentDefinition = ref<FlowDefinition | null>(null)
   const { loading, error, withLoading } = useDataLoading({ timeout: 15000 })
 
-  async function fetchDefinitions(params?: { search?: string; status?: string; page?: number }) {
+  async function fetchDefinitions(params?: { search?: string; status?: string; page?: number; pageSize?: number }) {
     await withLoading(async () => {
       const data = await flowApi.listFlows(params)
       definitions.value = data.items

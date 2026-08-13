@@ -7,6 +7,8 @@ import { useFlowInstanceStore } from '../stores/flowInstance.js'
 import styles from './FlowListView.module.scss'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
 import FilterTabs from '@schema-platform/platform-shared/components/common/FilterTabs.vue'
+import AppPagination from '@schema-platform/platform-shared/components/common/AppPagination.vue'
+import { DEFAULT_PAGE_SIZE } from '@schema-platform/platform-shared/utils/pagination'
 
 const router = useRouter()
 const store = useFlowDefinitionStore()
@@ -23,7 +25,7 @@ const createForm = reactive({
 
 // 分页
 const page = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(DEFAULT_PAGE_SIZE)
 
 // 筛选
 const activeTab = ref('all')
@@ -148,6 +150,15 @@ function handlePageChange(newPage: number) {
   fetchDefinitions()
 }
 
+/**
+ * @param size - 每页条数
+ */
+function handleSizeChange(size: number) {
+  pageSize.value = size
+  page.value = 1
+  fetchDefinitions()
+}
+
 function handleFilter() {
   page.value = 1
   fetchDefinitions()
@@ -157,6 +168,7 @@ function fetchDefinitions() {
   store.fetchDefinitions({
     status: activeTab.value === 'all' ? undefined : activeTab.value,
     page: page.value,
+    pageSize: pageSize.value,
   }).then(() => {
     filteredTotal.value = store.definitions.length
   })
@@ -258,17 +270,13 @@ function fetchDefinitions() {
       </div>
 
       <!-- Pagination -->
-      <div v-if="filteredTotal > pageSize" :class="styles.pagination">
-        <el-pagination
-          v-model:current-page="page"
-          v-model:page-size="pageSize"
-          :total="filteredTotal"
-          :page-sizes="[10, 20, 50]"
-          layout="total, sizes, prev, pager, next"
-          @current-change="handlePageChange"
-          @size-change="handlePageChange"
-        />
-      </div>
+      <AppPagination
+        v-model:current-page="page"
+        v-model:page-size="pageSize"
+        :total="filteredTotal"
+        @current-change="handlePageChange"
+        @size-change="handleSizeChange"
+      />
     </div>
 
     <!-- 新建流程对话框 -->

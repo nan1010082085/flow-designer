@@ -8,6 +8,8 @@ import type { FlowInstanceStatus } from '@/shared/flow'
 import styles from './FlowInstanceListView.module.scss'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
 import FilterTabs from '@schema-platform/platform-shared/components/common/FilterTabs.vue'
+import AppPagination from '@schema-platform/platform-shared/components/common/AppPagination.vue'
+import { DEFAULT_PAGE_SIZE } from '@schema-platform/platform-shared/utils/pagination'
 
 const router = useRouter()
 const store = useFlowInstanceStore()
@@ -16,7 +18,7 @@ const { instances, total, loading } = storeToRefs(store)
 const searchQuery = ref('')
 const statusFilter = ref<FlowInstanceStatus | ''>('')
 const page = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(DEFAULT_PAGE_SIZE)
 
 const statusTabs = [
   { label: '全部', value: '' },
@@ -31,14 +33,35 @@ onMounted(() => {
   store.fetchInstances()
 })
 
-function handleFilter() {
-  page.value = 1
+function fetchList() {
   store.fetchInstances({
     search: searchQuery.value || undefined,
     status: statusFilter.value || undefined,
     page: page.value,
     pageSize: pageSize.value,
   })
+}
+
+function handleFilter() {
+  page.value = 1
+  fetchList()
+}
+
+/**
+ * @param newPage - 页码
+ */
+function handlePageChange(newPage: number) {
+  page.value = newPage
+  fetchList()
+}
+
+/**
+ * @param size - 每页条数
+ */
+function handleSizeChange(size: number) {
+  pageSize.value = size
+  page.value = 1
+  fetchList()
 }
 
 function handleViewDetail(id: string) {
@@ -222,16 +245,12 @@ function formatDate(dateStr: string | Date) {
     </div>
 
     <!-- Pagination -->
-    <div v-if="total > pageSize" :class="styles.pagination">
-      <el-pagination
-        v-model:current-page="page"
-        v-model:page-size="pageSize"
-        :total="total"
-        :page-sizes="[10, 20, 50]"
-        layout="total, sizes, prev, pager, next"
-        @current-change="handleFilter"
-        @size-change="handleFilter"
-      />
-    </div>
+    <AppPagination
+      v-model:current-page="page"
+      v-model:page-size="pageSize"
+      :total="total"
+      @current-change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
   </div>
 </template>

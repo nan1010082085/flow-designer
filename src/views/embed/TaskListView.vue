@@ -45,16 +45,14 @@
     </div>
 
     <!-- 分页 -->
-    <div v-if="total > pageSize" :class="$style.pagination">
-      <el-pagination
-        :current-page="currentPage"
-        :page-size="pageSize"
-        :total="total"
-        layout="prev, pager, next"
-        small
-        @current-change="handlePageChange"
-      />
-    </div>
+    <AppPagination
+      :current-page="currentPage"
+      :page-size="pageSize"
+      :total="total"
+      size="small"
+      @current-change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
   </div>
 </template>
 
@@ -63,6 +61,8 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Loading } from '@element-plus/icons-vue'
 import { flowApi } from '../../api/flowApi'
+import AppPagination from '@schema-platform/platform-shared/components/common/AppPagination.vue'
+import { DEFAULT_PAGE_SIZE } from '@schema-platform/platform-shared/utils/pagination'
 
 const route = useRoute()
 
@@ -75,7 +75,7 @@ const loading = ref(false)
 const tasks = ref<any[]>([])
 const total = ref(0)
 const currentPage = ref(1)
-const pageSize = 20
+const pageSize = ref(DEFAULT_PAGE_SIZE)
 
 const searchQuery = ref('')
 const statusFilter = ref(status.value ?? '')
@@ -92,7 +92,7 @@ const filteredTasks = computed(() => {
 async function loadTasks() {
   loading.value = true
   try {
-    const result = await flowApi.getMyTasks(currentPage.value, pageSize, {
+    const result = await flowApi.getMyTasks(currentPage.value, pageSize.value, {
       status: statusFilter.value || undefined,
     })
     tasks.value = result.items
@@ -116,6 +116,15 @@ function handleTaskClick(task: any) {
 
 function handlePageChange(page: number) {
   currentPage.value = page
+  loadTasks()
+}
+
+/**
+ * @param size - 每页条数
+ */
+function handleSizeChange(size: number) {
+  pageSize.value = size
+  currentPage.value = 1
   loadTasks()
 }
 

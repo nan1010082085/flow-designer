@@ -2,18 +2,29 @@ import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createSharedSourceAliases } from '../scripts/vite-shared-source.mjs'
 
 const rootDir = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
   plugins: [vue()],
   resolve: {
-    alias: {
-      '@': resolve(rootDir, 'src'),
-      '@schema-platform/platform-shared/components/common/FilterTabs.vue': resolve(rootDir, 'src/__test_stubs__/FilterTabs.vue'),
-      '@schema-platform/platform-shared/components/common/AppIcon.vue': resolve(rootDir, 'src/__test_stubs__/AppIcon.vue'),
-      '@schema-platform/platform-shared/components/common/AppDialog.vue': resolve(rootDir, 'src/__test_stubs__/AppDialog.vue'),
-    },
+    alias: [
+      { find: '@', replacement: resolve(rootDir, 'src') },
+      {
+        find: '@schema-platform/platform-shared/components/common/FilterTabs.vue',
+        replacement: resolve(rootDir, 'src/__test_stubs__/FilterTabs.vue'),
+      },
+      {
+        find: '@schema-platform/platform-shared/components/common/AppIcon.vue',
+        replacement: resolve(rootDir, 'src/__test_stubs__/AppIcon.vue'),
+      },
+      {
+        find: '@schema-platform/platform-shared/components/common/AppDialog.vue',
+        replacement: resolve(rootDir, 'src/__test_stubs__/AppDialog.vue'),
+      },
+      ...createSharedSourceAliases(import.meta.url, { platformShared: true }),
+    ],
   },
   test: {
     globals: true,

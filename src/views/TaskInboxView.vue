@@ -12,6 +12,8 @@ import UserPicker from '../components/UserPicker.vue'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
 import AppDialog from '@schema-platform/platform-shared/components/common/AppDialog.vue'
 import FilterTabs from '@schema-platform/platform-shared/components/common/FilterTabs.vue'
+import AppPagination from '@schema-platform/platform-shared/components/common/AppPagination.vue'
+import { DEFAULT_PAGE_SIZE } from '@schema-platform/platform-shared/utils/pagination'
 import styles from './TaskInboxView.module.scss'
 
 const router = useRouter()
@@ -31,7 +33,7 @@ const sortOptions = [
   { label: '按到期时间', value: 'dueDate' },
 ]
 const page = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(DEFAULT_PAGE_SIZE)
 const delegateVisible = ref(false)
 const delegateTarget = ref<string[]>([])
 const delegateTaskId = ref('')
@@ -695,17 +697,13 @@ async function handleFormSave(formData: Record<string, unknown>) {
     </div>
 
     <!-- Pagination -->
-    <div :class="styles.pagination">
-      <el-pagination
-        v-model:current-page="page"
-        v-model:page-size="pageSize"
-        :total="store.tasksTotal"
-        :page-sizes="[10, 20, 50]"
-        layout="total, sizes, prev, pager, next"
-        @current-change="handlePageChange"
-        @size-change="handleSizeChange"
-      />
-    </div>
+    <AppPagination
+      v-model:current-page="page"
+      v-model:page-size="pageSize"
+      :total="store.tasksTotal"
+      @current-change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
 
     <!-- Form renderer container for claimed tasks with bound forms -->
     <div v-if="activeTask" :class="styles.formPanel">
