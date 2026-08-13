@@ -3,11 +3,24 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import styles from './AppLayout.module.scss'
 import AppIcon from '@schema-platform/platform-shared/components/common/AppIcon.vue'
+import AppUserPanel from '@schema-platform/platform-shared/components/common/AppUserPanel.vue'
+import { useAuthStore } from '@schema-platform/platform-shared/utils/stores/authStore'
+import { stopTokenRefreshSchedule } from '@schema-platform/platform-shared/utils/authSession'
 import { useQiankunShell } from '@schema-platform/platform-shared/qiankun'
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 const { isQiankunSubApp, shouldHideSubAppMenu, goToShellHome } = useQiankunShell()
+
+/**
+ * 退出登录并跳转登录页
+ */
+function handleLogout() {
+  stopTokenRefreshSchedule()
+  authStore.reset()
+  void router.push({ name: 'login' })
+}
 
 const navItems = [
   { path: '/list', label: '流程列表', icon: 'document' },
@@ -48,8 +61,15 @@ const activeNav = computed(() => {
         </router-link>
       </nav>
 
-      <div v-if="isQiankunSubApp && !shouldHideSubAppMenu" :class="styles.sidebarFooter" data-test="sidebar-footer">
+      <div :class="styles.sidebarFooter" data-test="sidebar-footer">
+        <AppUserPanel
+          :user="authStore.user"
+          placement="top-start"
+          block
+          @logout="handleLogout"
+        />
         <button
+          v-if="isQiankunSubApp && !shouldHideSubAppMenu"
           type="button"
           :class="[styles.navItem, styles.footerItem]"
           title="返回主应用首页"
