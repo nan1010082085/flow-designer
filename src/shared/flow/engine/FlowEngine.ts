@@ -22,7 +22,7 @@ import type {
 import { ExecutableModel, type ParsedNode, type ParsedEdge } from './ExecutableModel.js'
 import { parseBpmnGraph } from './BpmnParser.js'
 import { validateFlow } from './FlowValidator.js'
-import { evaluateExpression } from './ExpressionEvaluator.js'
+import { evaluateExpression, evaluateScript } from './ExpressionEvaluator.js'
 
 // ────────────────────────────────────────────
 // 执行上下文
@@ -1007,21 +1007,230 @@ class ServiceTaskExecutor implements NodeExecutor {
   ): Promise<NodeExecutionResult> {
     const config = node.config
 
-    // 根据 serviceType 执行
-    switch (config.serviceType) {
-      case 'http':
-        // TODO: 执行 HTTP 请求
-        break
-      case 'script':
-        // TODO: 执行脚本
-        break
-      case 'function':
-        // TODO: 调用函数
-        break
+    try {
+      switch (config.serviceType) {
+        case 'http':
+          await this.executeHttpRequest(config, context)
+          break
+        case 'script':
+          this.executeScript(config, context)
+          break
+        case 'function':
+          this.executeFunction(config, context)
+          break
+        case 'dataUpdate':
+          this.executeDataUpdate(config, context)
+          break
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      return { action: 'error', error: `ServiceTask 执行失败: ${errorMsg}` }
     }
 
     const nextNodeIds = edges.map(e => e.targetNodeId)
     return { action: 'continue', nextNodeIds }
+  }
+
+  /**
+   * 执行 HTTP 请求
+   * 支持 apiConfig 中的 url/method/headers/body/timeout
+   * 响应结果写入 context.variables[resultVariable]
+   */
+  private async executeHttpRequest(
+    config: BpmnNodeConfig,
+    context: ExecutionContext,
+  ): Promise<void> {
+    const apiConfig = config.apiConfig
+    if (!apiConfig?.url) {
+      throw new Error('HTTP 请求缺少 url 配置')
+    }
+
+    // 模板变量替换：支持 ${variableName} 语法
+    const resolvedUrl = this.resolveTemplate(apiConfig.url, context.variables)
+    const method = (apiConfig.method || 'GET').toUpperCase()
+    const timeout = apiConfig.timeout ?? 30000
+
+    const fetchOptions: RequestInit = {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...apiConfig.headers,
+      },
+      signal: AbortSignal.timeout(timeout),
+    }
+
+    if (method !== 'GET' && method !== 'HEAD' && apiConfig.body) {
+      fetchOptions.body = JSON.stringify(
+        this.resolveTemplateDeep(apiConfig.body, context.variables),
+      )
+    }
+
+    const response = await fetch(resolvedUrl, fetchOptions)
+    if (!response.ok) {
+      throw new Error(`HTTP 请求失败: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    // 按 dataPath 提取嵌套字段
+    const result = apiConfig.dataPath
+      ? this.resolveDataPath(data, apiConfig.dataPath)
+      : data
+
+    // 写入流程变量
+    const resultVar = config.resultVariable || 'httpResult'
+    context.variables[resultVar] = result
+  }
+
+  /**
+   * 执行脚本表达式（通过安全的 ExpressionEvaluator）
+   */
+  private executeScript(
+    config: BpmnNodeConfig,
+    context: ExecutionContext,
+  ): void {
+    const scriptContent = config.scriptContent
+    if (!scriptContent) {
+      throw new Error('脚本任务缺少 scriptContent 配置')
+    }
+
+    const result = evaluateScript(scriptContent, context.variables)
+
+    if (config.resultVariable) {
+      context.variables[config.resultVariable] = result
+    }
+  }
+
+  /**
+   * 调用预定义函数
+   * serviceConfig.functionName + serviceConfig.args
+   */
+  private executeFunction(
+    config: BpmnNodeConfig,
+    context: ExecutionContext,
+  ): void {
+    const serviceConfig = config.serviceConfig || {}
+    const functionName = serviceConfig.functionName as string
+    if (!functionName) {
+      throw new Error('函数调用缺少 functionName 配置')
+    }
+
+    const args = (serviceConfig.args as unknown[]) || []
+    const resolvedArgs = args.map(arg =>
+      typeof arg === 'string' ? this.resolveTemplate(arg, context.variables) : arg,
+    )
+
+    // 内置函数注册表
+    const builtins: Record<string, (...args: unknown[]) => unknown> = {
+      'math.sum': (...a) => (a as number[]).reduce((s, v) => s + (Number(v) || 0), 0),
+      'math.avg': (...a) => {
+        const nums = (a as number[]).map(Number).filter(n => !isNaN(n))
+        return nums.length ? nums.reduce((s, v) => s + v, 0) / nums.length : 0
+      },
+      'math.max': (...a) => Math.max(...(a as number[]).map(Number)),
+      'math.min': (...a) => Math.min(...(a as number[]).map(Number)),
+      'string.concat': (...a) => a.map(String).join(''),
+      'string.template': (template, data) => {
+        if (typeof template !== 'string' || typeof data !== 'object' || !data) return template
+        return (template as string).replace(/\$\{([^}]+)}/g, (_, key) => {
+          const val = (data as Record<string, unknown>)[key]
+          return val != null ? String(val) : ''
+        })
+      },
+      'date.now': () => new Date().toISOString(),
+      'date.format': (date, fmt) => {
+        const d = date instanceof Date ? date : new Date(String(date))
+        if (isNaN(d.getTime())) return String(date)
+        // 简单格式化：YYYY-MM-DD HH:mm:ss
+        const pad = (n: number) => String(n).padStart(2, '0')
+        const replacements: Record<string, string> = {
+          'YYYY': String(d.getFullYear()),
+          'MM': pad(d.getMonth() + 1),
+          'DD': pad(d.getDate()),
+          'HH': pad(d.getHours()),
+          'mm': pad(d.getMinutes()),
+          'ss': pad(d.getSeconds()),
+        }
+        let result = String(fmt || 'YYYY-MM-DD HH:mm:ss')
+        for (const [k, v] of Object.entries(replacements)) {
+          result = result.replace(k, v)
+        }
+        return result
+      },
+      'json.parse': (str) => JSON.parse(String(str)),
+      'json.stringify': (obj) => JSON.stringify(obj),
+      'util.default': (value, fallback) => value ?? fallback,
+      'util.coalesce': (...a) => a.find(v => v != null),
+    }
+
+    const fn = builtins[functionName]
+    if (!fn) {
+      throw new Error(`未知的函数: ${functionName}`)
+    }
+
+    const result = fn(...resolvedArgs)
+
+    if (config.resultVariable) {
+      context.variables[config.resultVariable] = result
+    }
+  }
+
+  /**
+   * 数据更新操作
+   */
+  private executeDataUpdate(
+    config: BpmnNodeConfig,
+    context: ExecutionContext,
+  ): void {
+    // dataUpdate 由外部持久化层处理，这里只做变量映射
+    const serviceConfig = config.serviceConfig || {}
+    const rules = serviceConfig.rules as Array<{
+      sourceField: string
+      targetField: string
+      transform?: string
+    }> | undefined
+
+    if (rules?.length) {
+      for (const rule of rules) {
+        const value = context.variables[rule.sourceField]
+        if (rule.transform) {
+          const result = evaluateScript(rule.transform, { ...context.variables, value })
+          context.variables[rule.targetField] = result
+        } else {
+          context.variables[rule.targetField] = value
+        }
+      }
+    }
+  }
+
+  /** 模板变量替换：${varName} → variables[varName] */
+  private resolveTemplate(template: string, variables: Record<string, unknown>): string {
+    return template.replace(/\$\{([^}]+)}/g, (_, key) => {
+      const val = variables[key.trim()]
+      return val != null ? String(val) : ''
+    })
+  }
+
+  /** 深度模板替换（递归处理对象/数组） */
+  private resolveTemplateDeep(obj: unknown, variables: Record<string, unknown>): unknown {
+    if (typeof obj === 'string') return this.resolveTemplate(obj, variables)
+    if (Array.isArray(obj)) return obj.map(item => this.resolveTemplateDeep(item, variables))
+    if (obj && typeof obj === 'object') {
+      const result: Record<string, unknown> = {}
+      for (const [k, v] of Object.entries(obj)) {
+        result[k] = this.resolveTemplateDeep(v, variables)
+      }
+      return result
+    }
+    return obj
+  }
+
+  /** 按点分路径提取嵌套字段：a.b.c */
+  private resolveDataPath(data: unknown, path: string): unknown {
+    return path.split('.').reduce((obj, key) => {
+      if (obj == null || typeof obj !== 'object') return undefined
+      return (obj as Record<string, unknown>)[key]
+    }, data)
   }
 }
 
@@ -1034,6 +1243,26 @@ class ScriptTaskExecutor implements NodeExecutor {
     context: ExecutionContext,
     engine: FlowEngineAPI,
   ): Promise<NodeExecutionResult> {
+    const config = node.config
+
+    try {
+      const scriptContent = config.scriptContent
+      if (!scriptContent) {
+        throw new Error('脚本任务缺少 scriptContent 配置')
+      }
+
+      // 使用安全的表达式求值器执行脚本
+      const result = evaluateScript(scriptContent, context.variables)
+
+      // 将结果写入流程变量
+      if (config.resultVariable) {
+        context.variables[config.resultVariable] = result
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      return { action: 'error', error: `ScriptTask 执行失败: ${errorMsg}` }
+    }
+
     const nextNodeIds = edges.map(e => e.targetNodeId)
     return { action: 'continue', nextNodeIds }
   }
@@ -1048,9 +1277,159 @@ class TimerEventExecutor implements NodeExecutor {
     context: ExecutionContext,
     engine: FlowEngineAPI,
   ): Promise<NodeExecutionResult> {
-    // TODO: 实现定时器逻辑
+    const config = node.config
+    const timerType = config.timerType
+    const timerValue = config.timerValue
+
+    if (!timerValue) {
+      // 无定时配置，直接继续
+      const nextNodeIds = edges.map(e => e.targetNodeId)
+      return { action: 'continue', nextNodeIds }
+    }
+
+    try {
+      switch (timerType) {
+        case 'duration':
+          return await this.handleDuration(timerValue, edges)
+        case 'date':
+          return await this.handleDate(timerValue, edges)
+        case 'cycle':
+          return await this.handleCycle(timerValue, config, context, edges)
+        default:
+          // 未知类型，直接继续
+          {
+            const nextNodeIds = edges.map(e => e.targetNodeId)
+            return { action: 'continue', nextNodeIds }
+          }
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err)
+      return { action: 'error', error: `TimerEvent 执行失败: ${errorMsg}` }
+    }
+  }
+
+  /**
+   * 处理 duration 类型定时器
+   * 支持 ISO 8601 duration 格式：PT1H30M、P2D 等
+   * 也支持简单数字（毫秒）
+   */
+  private async handleDuration(
+    timerValue: string,
+    edges: ParsedEdge[],
+  ): Promise<NodeExecutionResult> {
+    const delayMs = this.parseDuration(timerValue)
+    if (delayMs <= 0) {
+      const nextNodeIds = edges.map(e => e.targetNodeId)
+      return { action: 'continue', nextNodeIds }
+    }
+
+    // 等待指定时间
+    await new Promise(resolve => setTimeout(resolve, delayMs))
+
     const nextNodeIds = edges.map(e => e.targetNodeId)
     return { action: 'continue', nextNodeIds }
+  }
+
+  /**
+   * 处理 date 类型定时器
+   * 支持 ISO 8601 日期格式：2026-08-17T10:00:00Z
+   */
+  private async handleDate(
+    timerValue: string,
+    edges: ParsedEdge[],
+  ): Promise<NodeExecutionResult> {
+    const targetTime = new Date(timerValue).getTime()
+    if (isNaN(targetTime)) {
+      throw new Error(`无效的日期格式: ${timerValue}`)
+    }
+
+    const now = Date.now()
+    const delayMs = targetTime - now
+
+    if (delayMs > 0) {
+      await new Promise(resolve => setTimeout(resolve, delayMs))
+    }
+
+    const nextNodeIds = edges.map(e => e.targetNodeId)
+    return { action: 'continue', nextNodeIds }
+  }
+
+  /**
+   * 处理 cycle 类型定时器
+   * 支持 cron 表达式或间隔时间
+   * 当前实现：执行一次后继续（循环调度由外部调度器管理）
+   */
+  private async handleCycle(
+    timerValue: string,
+    config: BpmnNodeConfig,
+    context: ExecutionContext,
+    edges: ParsedEdge[],
+  ): Promise<NodeExecutionResult> {
+    // 解析间隔：可以是 PT5M 格式或数字（毫秒）
+    const intervalMs = this.parseDuration(timerValue)
+
+    // 检查是否已有循环计数器
+    const cycleKey = `_timer_cycle_${config.label || 'timer'}`
+    const currentCycle = (context.variables[cycleKey] as number) || 0
+    const maxCycles = (config.serviceConfig?.maxCycles as number) || Infinity
+
+    if (currentCycle >= maxCycles) {
+      // 达到最大循环次数，继续执行
+      delete context.variables[cycleKey]
+      const nextNodeIds = edges.map(e => e.targetNodeId)
+      return { action: 'continue', nextNodeIds }
+    }
+
+    // 等待一个间隔
+    if (intervalMs > 0) {
+      await new Promise(resolve => setTimeout(resolve, intervalMs))
+    }
+
+    // 更新循环计数
+    context.variables[cycleKey] = currentCycle + 1
+
+    const nextNodeIds = edges.map(e => e.targetNodeId)
+    return { action: 'continue', nextNodeIds }
+  }
+
+  /**
+   * 解析时间持续值
+   * 支持：
+   * - ISO 8601 duration: PT1H30M、P2D、PT30S
+   * - 纯数字（毫秒）
+   */
+  private parseDuration(value: string): number {
+    // 纯数字：直接作为毫秒
+    if (/^\d+$/.test(value.trim())) {
+      return parseInt(value.trim(), 10)
+    }
+
+    // ISO 8601 duration 解析
+    const match = value.match(
+      /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/,
+    )
+
+    if (!match) {
+      throw new Error(`无法解析时间持续值: ${value}`)
+    }
+
+    const years = parseInt(match[1] || '0', 10)
+    const months = parseInt(match[2] || '0', 10)
+    const days = parseInt(match[3] || '0', 10)
+    const hours = parseInt(match[4] || '0', 10)
+    const minutes = parseInt(match[5] || '0', 10)
+    const seconds = parseFloat(match[6] || '0')
+
+    // 转换为毫秒（近似值：1月=30天，1年=365天）
+    const ms =
+      years * 365 * 24 * 60 * 60 * 1000 +
+      months * 30 * 24 * 60 * 60 * 1000 +
+      days * 24 * 60 * 60 * 1000 +
+      hours * 60 * 60 * 1000 +
+      minutes * 60 * 1000 +
+      seconds * 1000
+
+    return ms
   }
 }
 

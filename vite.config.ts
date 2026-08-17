@@ -26,10 +26,14 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       cssCodeSplit: false,
+      chunkSizeWarningLimit: 600,
       rollupOptions: {
         output: {
-          format: 'umd',
-          name: 'flow',
+          format: 'es',
+          manualChunks: {
+            'element-plus': ['element-plus', '@element-plus/icons-vue'],
+            'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          },
         },
       },
     },
