@@ -44,6 +44,23 @@ import { redirectToLogin } from '@schema-platform/platform-shared/utils/authPath
 const API_BASE = import.meta.env.VITE_API_BASE_URL
 const ACCESS_TOKEN_KEY = 'sfp_access_token'
 
+// ── 统一错误类型 ──
+
+export class ApiError extends Error {
+  public readonly status: number
+  public readonly code?: string
+  public readonly details: unknown
+
+  constructor(message: string, status: number, code?: string, details?: unknown) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+    this.code = code
+    this.details = details
+    Object.setPrototypeOf(this, ApiError.prototype)
+  }
+}
+
 /** Token 提供者，由 main.ts 注入，避免 apiClient 直接耦合微前端框架 */
 let tokenProvider: (() => string | null) | null = null
 let onUnauthorized: (() => void) | null = null
@@ -76,13 +93,24 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
     if (res.status === 401) {
       onUnauthorized?.()
       redirectToLogin()
-      throw new Error('Authentication required')
+      throw new ApiError('Authentication required', 401)
     }
-    const text = await res.text().catch(() => '')
-    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`)
+    let message = 'HTTP ' + res.status + ': ' + res.statusText
+    let code: string | undefined
+    try {
+      const errBody = await res.json()
+      if (errBody?.error) {
+        message = typeof errBody.error === 'string' ? errBody.error : (errBody.error.message ?? message)
+        code = typeof errBody.error === 'object' ? errBody.error.code : undefined
+      }
+    } catch {
+      const text = await res.text().catch(() => '')
+      if (text) message = 'HTTP ' + res.status + ': ' + text
+    }
+    throw new ApiError(message, res.status, code)
   }
   const json = await res.json()
-  if (!json.success) throw new Error(json.error?.message ?? 'Request failed')
+  if (!json.success) throw new ApiError(json.error?.message ?? 'Request failed', res.status, json.error?.code)
   return json.data
 }
 
@@ -106,13 +134,24 @@ export async function fetchApiRaw(url: string, init?: RequestInit): Promise<unkn
     if (res.status === 401) {
       onUnauthorized?.()
       redirectToLogin()
-      throw new Error('Authentication required')
+      throw new ApiError('Authentication required', 401)
     }
-    const text = await res.text().catch(() => '')
-    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`)
+    let message = 'HTTP ' + res.status + ': ' + res.statusText
+    let code: string | undefined
+    try {
+      const errBody = await res.json()
+      if (errBody?.error) {
+        message = typeof errBody.error === 'string' ? errBody.error : (errBody.error.message ?? message)
+        code = typeof errBody.error === 'object' ? errBody.error.code : undefined
+      }
+    } catch {
+      const text = await res.text().catch(() => '')
+      if (text) message = 'HTTP ' + res.status + ': ' + text
+    }
+    throw new ApiError(message, res.status, code)
   }
   const json = await res.json()
-  if (json.success === false) throw new Error(json.error?.message ?? 'Request failed')
+  if (json.success === false) throw new ApiError(json.error?.message ?? 'Request failed', res.status, json.error?.code)
   return json
 }
 
