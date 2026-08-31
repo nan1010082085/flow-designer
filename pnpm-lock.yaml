@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@apform-ui/core':
+        specifier: file:../ui/packages/core
+        version: file:../ui/packages/core(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(vue@3.5.39(typescript@5.7.3))
       '@dagrejs/dagre':
         specifier: ^3.0.0
         version: 3.0.0
@@ -22,7 +25,7 @@ importers:
         version: 5.0.1(vue@3.5.39(typescript@5.7.3))
       '@schema-platform/platform-shared':
         specifier: file:../shared/platform-shared
-        version: file:../shared/platform-shared(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(typescript@5.7.3)(vue@3.5.39(typescript@5.7.3))
+        version: file:../shared/platform-shared(@apform-ui/core@file:../ui/packages/core(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(vue@3.5.39(typescript@5.7.3)))(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(typescript@5.7.3)(vue@3.5.39(typescript@5.7.3))
       '@vue-flow/background':
         specifier: ^1.3.2
         version: 1.3.2(@vue-flow/core@1.48.2(vue@3.5.39(typescript@5.7.3)))(vue@3.5.39(typescript@5.7.3))
@@ -42,7 +45,7 @@ importers:
         specifier: ^6.1.0
         version: 6.1.0
       element-plus:
-        specifier: ^2.9.7
+        specifier: 2.14.2
         version: 2.14.2(vue@3.5.39(typescript@5.7.3))
       pinia:
         specifier: ^2.3.0
@@ -95,6 +98,12 @@ importers:
         version: 2.2.12(typescript@5.7.3)
 
 packages:
+
+  '@apform-ui/core@file:../ui/packages/core':
+    resolution: {directory: ../ui/packages/core, type: directory}
+    peerDependencies:
+      element-plus: 2.14.2
+      vue: ^3.5.0
 
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
@@ -583,7 +592,8 @@ packages:
   '@schema-platform/platform-shared@file:../shared/platform-shared':
     resolution: {directory: ../shared/platform-shared, type: directory}
     peerDependencies:
-      element-plus: ^2.9.1
+      '@apform-ui/core': ^1.3.0
+      element-plus: 2.14.2
       vue: ^3.5.13
 
   '@socket.io/component-emitter@3.1.2':
@@ -609,6 +619,9 @@ packages:
 
   '@types/node@26.0.1':
     resolution: {integrity: sha512-fc3KiUoBt6kie0N9bIW3E47vZsuaMf0PM2AaUpLCLT0s/LvX1nxAim6Fc049cNxODPpGm6qRAuUOB86SkRuPQw==}
+
+  '@types/trusted-types@2.0.7':
+    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
 
   '@types/web-bluetooth@0.0.20':
     resolution: {integrity: sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==}
@@ -960,6 +973,9 @@ packages:
     resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
     engines: {node: '>= 4'}
 
+  dompurify@3.4.14:
+    resolution: {integrity: sha512-dVoH9z+MY+C9IilgGCk3YfFqjLi3fChm2OiKJMzh6axrJ5qwxqWaZamgmHrpv22CN/KdbZJuGEGgfQoL00LTdg==}
+
   domutils@3.2.2:
     resolution: {integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==}
 
@@ -1210,6 +1226,11 @@ packages:
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
+
+  marked@18.0.11:
+    resolution: {integrity: sha512-HnslJfsZkRPBDJRHvVtAaWlZHEpSu7u8LgQuJCELjRKuWR+hpq4A7sLq3p8HaI9ypVoXDXxV34CsQJEe1+J5Aw==}
+    engines: {node: '>= 20'}
+    hasBin: true
 
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
@@ -1784,6 +1805,16 @@ packages:
 
 snapshots:
 
+  '@apform-ui/core@file:../ui/packages/core(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(vue@3.5.39(typescript@5.7.3))':
+    dependencies:
+      '@element-plus/icons-vue': 2.3.2(vue@3.5.39(typescript@5.7.3))
+      '@iconify-icons/ep': 1.2.12
+      '@iconify/vue': 5.0.1(vue@3.5.39(typescript@5.7.3))
+      dompurify: 3.4.14
+      element-plus: 2.14.2(vue@3.5.39(typescript@5.7.3))
+      marked: 18.0.11
+      vue: 3.5.39(typescript@5.7.3)
+
   '@asamuzakjp/css-color@3.2.0':
     dependencies:
       '@csstools/css-calc': 2.1.4(@csstools/css-parser-algorithms@3.0.5(@csstools/css-tokenizer@3.0.4))(@csstools/css-tokenizer@3.0.4)
@@ -2102,8 +2133,9 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.62.2':
     optional: true
 
-  '@schema-platform/platform-shared@file:../shared/platform-shared(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(typescript@5.7.3)(vue@3.5.39(typescript@5.7.3))':
+  '@schema-platform/platform-shared@file:../shared/platform-shared(@apform-ui/core@file:../ui/packages/core(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(vue@3.5.39(typescript@5.7.3)))(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(typescript@5.7.3)(vue@3.5.39(typescript@5.7.3))':
     dependencies:
+      '@apform-ui/core': file:../ui/packages/core(element-plus@2.14.2(vue@3.5.39(typescript@5.7.3)))(vue@3.5.39(typescript@5.7.3))
       '@element-plus/icons-vue': 2.3.2(vue@3.5.39(typescript@5.7.3))
       '@iconify-icons/ep': 1.2.12
       '@iconify/vue': 5.0.1(vue@3.5.39(typescript@5.7.3))
@@ -2145,6 +2177,9 @@ snapshots:
   '@types/node@26.0.1':
     dependencies:
       undici-types: 8.3.0
+
+  '@types/trusted-types@2.0.7':
+    optional: true
 
   '@types/web-bluetooth@0.0.20': {}
 
@@ -2554,6 +2589,10 @@ snapshots:
     dependencies:
       domelementtype: 2.3.0
 
+  dompurify@3.4.14:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
+
   domutils@3.2.2:
     dependencies:
       dom-serializer: 2.0.0
@@ -2866,6 +2905,8 @@ snapshots:
   magic-string@0.30.21:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  marked@18.0.11: {}
 
   math-intrinsics@1.1.0: {}
 

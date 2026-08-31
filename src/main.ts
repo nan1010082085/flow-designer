@@ -1,4 +1,6 @@
 import 'element-plus/dist/index.css'
+import '@apform-ui/core/design-tokens.css'
+import '@apform-ui/core/style.css'
 import '@schema-platform/platform-shared/styles/theme.scss'
 import '@schema-platform/platform-shared/styles/css-variables.scss'
 import './styles/variables.scss'
