@@ -13,7 +13,11 @@ const routes = [
     component: () => import('@schema-platform/platform-shared/components/auth/LoginView.vue'),
     props: {
       title: '流程设计器',
-      subtitle: 'Schema Form Platform',
+      subtitle: '输入账号后选择组织租户',
+      defaultTenantCode: 'default',
+      lockTenantCode: false,
+      resolveTenantsByUsername: true,
+      registerMode: 'both',
     },
     meta: { public: true },
   },
